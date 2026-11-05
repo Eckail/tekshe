@@ -4,6 +4,7 @@
  * the application model.
  */
 export type CurriculumModuleKind =
+  | "pronunciation"
   | "vocabulary-characters"
   | "grammar"
   | "reading"
