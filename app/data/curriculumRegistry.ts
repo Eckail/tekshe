@@ -28,7 +28,7 @@ export const beginnerCurriculum: HskCurriculum = {
   modules: [
     {
       id: "pinyin-module",
-      kind: "vocabulary-characters",
+      kind: "pronunciation",
       title: "Пиньинь және дыбыстау",
       learningObjectives: [
         "Пиньинь буынының бастапқы дауыссыз және соңғы бөлігін тану",
