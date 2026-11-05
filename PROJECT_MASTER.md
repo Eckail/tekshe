@@ -125,5 +125,5 @@ Recommended next stage: get native Kazakh review for the current material, then 
 
 - Obtain native Kazakh editorial review and use reviewed Mandarin recordings instead of relying solely on device speech synthesis.
 - Implement streak tracking before paying the configured streak reward.
-- Verify Vercel Preview access and test a logged-out beta URL before sharing it as a public mobile beta.
+- GitHub reported a successful Vercel check for the pushed feature branch; deployment detail access is 403, so the Preview hostname and logged-out access remain unverified. Verify access and test before sharing a public mobile beta.
 - Perform visual acceptance checks at 360, 375, 390, 430, 768, 1024, and 1440 px and test localStorage persistence on a real phone.

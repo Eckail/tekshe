@@ -137,6 +137,7 @@ XP remains client-side and can be edited by the learner through browser storage.
 - Responsive behavior was reviewed in code, but no browser automation tool is available in this environment; physical-device and 360–1440 px visual QA remain unverified. PWA installation and offline behavior also still need device testing.
 - A public, logged-out beta URL is not yet verified. Vercel preview protection must be checked before sharing a deployment URL.
 - Vercel's project list returned the `tekshe` project, but project details and deployment settings returned 403 for the `eckail` scope. The earlier audit noted authenticated Preview pages; that setting was not revalidated in this pass. A new one-time owner access link was issued, and Preview details remain pending approval.
+- After the feature push, GitHub reported a successful `Vercel` status check for the commit. Its target is the Vercel dashboard; the Preview hostname and logged-out access could not be verified because deployment detail access still returns 403.
 
 ### Remaining limitations
 

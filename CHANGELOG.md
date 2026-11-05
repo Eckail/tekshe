@@ -89,4 +89,5 @@
 - Next.js production build: passed; all new route entries generated.
 - XP, curriculum, progress, and wallet tests: 14 passed.
 - Local HTTP checks returned 200 for the primary routes and PWA assets, with 404 for invalid routes. No browser automation is available in this environment, so actual phone viewport, logged-out Preview, PWA installability, and offline behavior remain unverified.
+- GitHub reports a successful Vercel status check for the feature push; deployment details and a logged-out Preview URL could not be verified because the Vercel team API returned 403.
 - No Production deployment was triggered.
