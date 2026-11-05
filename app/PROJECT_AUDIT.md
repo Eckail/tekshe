@@ -70,4 +70,4 @@ XP remains client-side and can be edited by the learner through browser storage.
 - ESLint: passed.
 - Production build: passed with Next.js 16.4.3; `/` and `/_not-found` prerender successfully.
 - Local development server returned HTTP 200 for `/`; all rendered in-page anchor links resolved to existing section IDs. `/learn`, `/courses`, and `/xp` are not routes; the learning path, course content, and XP UI are sections on `/`.
-- The production site returned HTTP 200 during this review. Its latest Production deployment is from `main` at commit `17b777b`; the current Preview deployment for `feature/learning-system` is READY at commit `e1f14db` and requires Vercel sign-in.
+- Vercel is connected to GitHub. Production deployment metadata points to `main`; pushes to `feature/learning-system` create READY Preview deployments. Preview hosts redirect to Vercel sign-in.
