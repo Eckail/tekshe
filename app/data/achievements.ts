@@ -1,6 +1,6 @@
 
 import { getLearningRecords } from "./progress";
-import { getTotalBonusXP } from "./dailyQuests";
+import { awardXP, getTotalXP, getXPForSource, hasXPAward } from "./xp";
 
 export type Achievement = {
   id: string;
@@ -17,9 +17,7 @@ const UNLOCKED_KEY = "tekshe-achievement-unlocked";
 export function getAchievements(): Achievement[] {
   const records = getLearningRecords();
 
-  const totalXP =
-    records.reduce((total, record) => total + record.xp, 0) +
-    getTotalBonusXP();
+  const totalXP = getTotalXP();
 
   const hasListening = records.some(
     (record) => record.mode === "listening"
@@ -67,13 +65,33 @@ export function getAchievements(): Achievement[] {
     },
   ];
 
-  const claimedIds: string[] = JSON.parse(
-    localStorage.getItem(CLAIMED_KEY) || "[]"
-  );
+  if (typeof window === "undefined") {
+    return definitions.map((item) => ({ ...item, claimed: false }));
+  }
 
-  const unlockedIds: string[] = JSON.parse(
-    localStorage.getItem(UNLOCKED_KEY) || "[]"
-  );
+  let claimedIds: string[] = [];
+  let unlockedIds: string[] = [];
+  try {
+    const savedClaims: unknown = JSON.parse(
+      window.localStorage.getItem(CLAIMED_KEY) || "[]"
+    );
+    const savedUnlocks: unknown = JSON.parse(
+      window.localStorage.getItem(UNLOCKED_KEY) || "[]"
+    );
+    if (Array.isArray(savedClaims)) {
+      claimedIds = savedClaims.filter(
+        (id): id is string => typeof id === "string"
+      );
+    }
+    if (Array.isArray(savedUnlocks)) {
+      unlockedIds = savedUnlocks.filter(
+        (id): id is string => typeof id === "string"
+      );
+    }
+  } catch {
+    claimedIds = [];
+    unlockedIds = [];
+  }
 
   const newlyUnlocked = definitions
     .filter((item) => item.unlocked)
@@ -83,12 +101,11 @@ export function getAchievements(): Achievement[] {
     new Set([...unlockedIds, ...newlyUnlocked])
   );
 
-  localStorage.setItem(UNLOCKED_KEY, JSON.stringify(allUnlocked));
-
   return definitions.map((item) => ({
     ...item,
     unlocked: allUnlocked.includes(item.id),
-    claimed: claimedIds.includes(item.id),
+    claimed:
+      claimedIds.includes(item.id) || hasXPAward(`achievement:${item.id}`),
   }));
 }
 
@@ -101,35 +118,31 @@ export function claimAchievement(id: string): boolean {
     return false;
   }
 
-  const claimedIds: string[] = JSON.parse(
-    localStorage.getItem(CLAIMED_KEY) || "[]"
-  );
+  if (typeof window === "undefined") return false;
 
-  claimedIds.push(id);
+  const awardId = `achievement:${id}`;
+  const awarded = awardXP(awardId, "achievement", achievement.reward);
+  if (!awarded && !hasXPAward(awardId)) return false;
 
-  localStorage.setItem(CLAIMED_KEY, JSON.stringify(claimedIds));
+  try {
+    const saved: unknown = JSON.parse(
+      window.localStorage.getItem(CLAIMED_KEY) || "[]"
+    );
+    const claimedIds = Array.isArray(saved)
+      ? saved.filter((claimedId): claimedId is string => typeof claimedId === "string")
+      : [];
 
-  const rewardsKey = "tekshe-achievement-rewards";
-  const rewards: Record<string, number> = JSON.parse(
-    localStorage.getItem(rewardsKey) || "{}"
-  );
+    if (!claimedIds.includes(id)) {
+      claimedIds.push(id);
+      window.localStorage.setItem(CLAIMED_KEY, JSON.stringify(claimedIds));
+    }
+  } catch {
+    // The XP event is authoritative; getAchievements also checks it directly.
+  }
 
-  rewards[id] = achievement.reward;
-
-  localStorage.setItem(rewardsKey, JSON.stringify(rewards));
-
-  window.dispatchEvent(new Event("tekshe-progress-updated"));
-
-  return true;
+  return awarded;
 }
 
 export function getTotalAchievementXP(): number {
-  const rewards: Record<string, number> = JSON.parse(
-    localStorage.getItem("tekshe-achievement-rewards") || "{}"
-  );
-
-  return Object.values(rewards).reduce(
-    (total, reward) => total + reward,
-    0
-  );
+  return getXPForSource("achievement");
 }

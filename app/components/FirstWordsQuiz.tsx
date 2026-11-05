@@ -1,8 +1,14 @@
 
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { completeCourse } from "../data/courseProgress";
+import {
+  calculateQuizXP,
+  createLearningRecordId,
+  saveQuizResult,
+} from "../data/progress";
+import { COURSE_COMPLETION_XP } from "../data/xp";
 
 const questions = [
   {
@@ -157,6 +163,9 @@ export default function FirstWordsQuiz() {
   const [selected, setSelected] = useState<string | null>(null);
   const [finished, setFinished] = useState(false);
   const [passed, setPassed] = useState(false);
+  const [courseXPRewarded, setCourseXPRewarded] = useState(false);
+  const recordSaved = useRef(false);
+  const attemptId = useRef<string | null>(null);
 
   const question = questions[current];
   const isCorrect = selected === question.answer;
@@ -178,20 +187,36 @@ export default function FirstWordsQuiz() {
       return;
     }
 
+    if (recordSaved.current) return;
+    recordSaved.current = true;
+    const currentAttemptId =
+      attemptId.current ?? createLearningRecordId();
+    attemptId.current = currentAttemptId;
+
     const finalScore = score;
-
-const didPass = finalScore >= 9;
-
+    const didPass = finalScore >= 9;
 
     setPassed(didPass);
     setFinished(true);
 
+    saveQuizResult({
+      id: currentAttemptId,
+      mode: "quiz",
+      score: finalScore,
+      total: questions.length,
+    });
+
     if (didPass) {
-      completeCourse("first-words");
+      setCourseXPRewarded(completeCourse("first-words"));
+    } else {
+      setCourseXPRewarded(false);
     }
   }
 
   function restartQuiz() {
+    recordSaved.current = false;
+    attemptId.current = null;
+    setCourseXPRewarded(false);
     setCurrent(0);
     setScore(0);
     setSelected(null);
@@ -308,6 +333,16 @@ const didPass = finalScore >= 9;
             <h3 className="mt-6 text-5xl font-semibold">
               {score} / 12
             </h3>
+
+            <p className="mt-2 font-semibold text-[#B85F3D]">
+              +{calculateQuizXP(score)} XP
+            </p>
+
+            {courseXPRewarded && (
+              <p className="mt-1 text-sm text-[#242321]/60">
+                +{COURSE_COMPLETION_XP} XP — курсты аяқтағаныңыз үшін
+              </p>
+            )}
 
             {passed ? (
               <>

@@ -1,5 +1,6 @@
 
 import { getLearningRecords } from "./progress";
+import { awardXP, getXPForSource, hasXPAward } from "./xp";
 
 export type DailyQuest = {
   id: string;
@@ -33,10 +34,24 @@ function getTodayRecords() {
 export function getDailyQuests(): DailyQuest[] {
   const records = getTodayRecords();
 
-  const claimedKey = `tekshe-daily-claims-${getTodayKey()}`;
-  const claimedIds: string[] = JSON.parse(
-    localStorage.getItem(claimedKey) || "[]"
-  );
+  const today = getTodayKey();
+  const claimedKey = `tekshe-daily-claims-${today}`;
+  let claimedIds: string[] = [];
+
+  if (typeof window !== "undefined") {
+    try {
+      const saved: unknown = JSON.parse(
+        window.localStorage.getItem(claimedKey) || "[]"
+      );
+      if (Array.isArray(saved)) {
+        claimedIds = saved.filter(
+          (id): id is string => typeof id === "string"
+        );
+      }
+    } catch {
+      claimedIds = [];
+    }
+  }
 
   const hasExercise = records.length >= 1;
   const bestScore = Math.max(0, ...records.map((r) => r.score));
@@ -53,7 +68,9 @@ export function getDailyQuests(): DailyQuest[] {
       progress: Math.min(records.length, 1),
       target: 1,
       completed: hasExercise,
-      claimed: claimedIds.includes("complete-exercise"),
+      claimed:
+        claimedIds.includes("complete-exercise") ||
+        hasXPAward(`daily-quest:${today}:complete-exercise`),
     },
     {
       id: "score-30",
@@ -63,7 +80,9 @@ export function getDailyQuests(): DailyQuest[] {
       progress: Math.min(bestScore, 30),
       target: 30,
       completed: bestScore >= 30,
-      claimed: claimedIds.includes("score-30"),
+      claimed:
+        claimedIds.includes("score-30") ||
+        hasXPAward(`daily-quest:${today}:score-30`),
     },
     {
       id: "listening-exercise",
@@ -73,7 +92,9 @@ export function getDailyQuests(): DailyQuest[] {
       progress: hasListening ? 1 : 0,
       target: 1,
       completed: hasListening,
-      claimed: claimedIds.includes("listening-exercise"),
+      claimed:
+        claimedIds.includes("listening-exercise") ||
+        hasXPAward(`daily-quest:${today}:listening-exercise`),
     },
   ];
 }
@@ -88,35 +109,31 @@ export function claimDailyQuest(id: string): boolean {
 
   const today = getTodayKey();
   const claimedKey = `tekshe-daily-claims-${today}`;
+  if (typeof window === "undefined") return false;
 
-  const claimedIds: string[] = JSON.parse(
-    localStorage.getItem(claimedKey) || "[]"
-  );
+  const awardId = `daily-quest:${today}:${id}`;
+  const awarded = awardXP(awardId, "daily-quest", quest.reward);
+  if (!awarded && !hasXPAward(awardId)) return false;
 
-  claimedIds.push(id);
-  localStorage.setItem(claimedKey, JSON.stringify(claimedIds));
+  try {
+    const saved: unknown = JSON.parse(
+      window.localStorage.getItem(claimedKey) || "[]"
+    );
+    const claimedIds = Array.isArray(saved)
+      ? saved.filter((claimId): claimId is string => typeof claimId === "string")
+      : [];
 
-  const rewardsKey = "tekshe-daily-rewards";
-  const rewards: Record<string, number> = JSON.parse(
-    localStorage.getItem(rewardsKey) || "{}"
-  );
+    if (!claimedIds.includes(id)) {
+      claimedIds.push(id);
+      window.localStorage.setItem(claimedKey, JSON.stringify(claimedIds));
+    }
+  } catch {
+    // The XP event is authoritative; getDailyQuests also checks it directly.
+  }
 
-  rewards[today] = (rewards[today] || 0) + quest.reward;
-
-  localStorage.setItem(rewardsKey, JSON.stringify(rewards));
-
-  window.dispatchEvent(new Event("tekshe-progress-updated"));
-
-  return true;
+  return awarded;
 }
 
 export function getTotalBonusXP(): number {
-  const rewards = JSON.parse(
-    localStorage.getItem("tekshe-daily-rewards") || "{}"
-  ) as Record<string, number>;
-
-  return Object.values(rewards).reduce(
-    (total, reward) => total + reward,
-    0
-  );
+  return getXPForSource("daily-quest");
 }

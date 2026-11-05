@@ -5,6 +5,7 @@ const courses = [
     subtitle: "PINYIN & TONES",
     description: "从发音开始，掌握汉语的声音与节奏。",
     symbol: "声",
+    href: "#pinyin-basics",
   },
   {
     number: "02",
@@ -12,6 +13,7 @@ const courses = [
     subtitle: "WORDS & CHARACTERS",
     description: "认识汉字，积累日常生活中的基础词汇。",
     symbol: "字",
+    href: "#first-words",
   },
   {
     number: "03",
@@ -19,6 +21,7 @@ const courses = [
     subtitle: "DAILY CONVERSATION",
     description: "从简单问候开始，逐渐建立中文表达能力。",
     symbol: "说",
+    href: "#simple-sentences",
   },
 ];
 
@@ -82,7 +85,7 @@ export default function Courses() {
               </p>
 
               <a
-                href="#about"
+                href={course.href}
                 className="mt-8 inline-block text-sm text-[#B85F3D]"
               >
                 КУРСТЫ ҚАРАУ ↗

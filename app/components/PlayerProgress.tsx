@@ -3,8 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { getLearningRecords } from "../data/progress";
-import { getTotalBonusXP } from "../data/dailyQuests";
-import { getTotalAchievementXP } from "../data/achievements";
+import { getTotalXP, initializeXPAwards } from "../data/xp";
 
 const levels = [
   { level: 1, title: "Бастаушы", xp: 0 },
@@ -20,27 +19,23 @@ export default function PlayerProgress() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-  function updateProgress() {
-    const records = getLearningRecords();
+    function updateProgress() {
+      initializeXPAwards();
+      const records = getLearningRecords();
 
-    const xp =
-  records.reduce((total, record) => total + record.xp, 0) +
-  getTotalBonusXP() +
-  getTotalAchievementXP();
+      setTotalXP(getTotalXP());
+      setCompletedLessons(records.length);
+      setLoaded(true);
+    }
 
-    setTotalXP(xp);
-    setCompletedLessons(records.length);
-    setLoaded(true);
-  }
+    updateProgress();
 
-  updateProgress();
+    window.addEventListener("tekshe-progress-updated", updateProgress);
 
-  window.addEventListener("tekshe-progress-updated", updateProgress);
-
-  return () => {
-    window.removeEventListener("tekshe-progress-updated", updateProgress);
-  };
-}, []);
+    return () => {
+      window.removeEventListener("tekshe-progress-updated", updateProgress);
+    };
+  }, []);
 
   if (!loaded) return null;
 

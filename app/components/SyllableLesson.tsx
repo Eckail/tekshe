@@ -1,93 +1,5 @@
 
-const syllables = [
-  {
-    pinyin: "mā",
-    hanzi: "妈",
-    meaning: "ана",
-    initial: "m",
-    final: "a",
-    tone: "1",
-    structure: "m + a + 1",
-    explanation: "m —声母，a —韵母，ā — бірінші тон.",
-  },
-  {
-    pinyin: "mǎ",
-    hanzi: "马",
-    meaning: "жылқы",
-    initial: "m",
-    final: "a",
-    tone: "3",
-    structure: "m + a + 3",
-    explanation: "m —声母，a —韵母，ǎ — үшінші тон.",
-  },
-  {
-    pinyin: "hǎo",
-    hanzi: "好",
-    meaning: "жақсы",
-    initial: "h",
-    final: "ao",
-    tone: "3",
-    structure: "h + ao + 3",
-    explanation: "h —声母，ao — күрделі韵母，ǎo — үшінші тон.",
-  },
-  {
-    pinyin: "guó",
-    hanzi: "国",
-    meaning: "ел",
-    initial: "g",
-    final: "uo",
-    tone: "2",
-    structure: "g + uo + 2",
-    explanation: "g —声母，uo —韵母，ó — екінші тон.",
-  },
-  {
-    pinyin: "shū",
-    hanzi: "书",
-    meaning: "кітап",
-    initial: "sh",
-    final: "u",
-    tone: "1",
-    structure: "sh + u + 1",
-    explanation: "sh — біртұтас声母, оны s және h деп бөлуге болмайды.",
-  },
-  {
-    pinyin: "ài",
-    hanzi: "爱",
-    meaning: "сүю",
-    initial: "жоқ",
-    final: "ai",
-    tone: "4",
-    structure: "零声母 + ai + 4",
-    explanation: "Бұл буында声母 жоқ. Ол韵母 ai дыбысынан басталады.",
-  },
-  {
-    pinyin: "yī",
-    hanzi: "衣",
-    meaning: "киім",
-    initial: "жоқ",
-    final: "i",
-    tone: "1",
-    structure: "零声母 + i + 1",
-    explanation: "y жазылуы бұл жерде жеке声母 ретінде қарастырылмайды. Буынның дыбыстық басталуы — i.",
-  },
-  {
-    pinyin: "dōng",
-    hanzi: "东",
-    meaning: "шығыс",
-    initial: "d",
-    final: "ong",
-    tone: "1",
-    structure: "d + ong + 1",
-    explanation: "d —声母, ong —韵母, ō — бірінші тон.",
-  },
-];
-
-const toneDescriptions = [
-  { tone: "第一声", name: "Бірінші тон", description: "Жоғары әрі бірқалыпты айтылады.", mark: "ā" },
-  { tone: "第二声", name: "Екінші тон", description: "Төменнен жоғары қарай көтеріледі.", mark: "á" },
-  { tone: "第三声", name: "Үшінші тон", description: "Жеке айтылғанда алдымен төмендеп, кейін көтеріледі.", mark: "ǎ" },
-  { tone: "第四声", name: "Төртінші тон", description: "Жоғарыдан төмен қарай тез түседі.", mark: "à" },
-];
+import { pinyinSyllables, pinyinToneDescriptions } from "../data/pinyin";
 
 export default function SyllableLesson() {
   return (
@@ -171,7 +83,7 @@ export default function SyllableLesson() {
           </p>
 
           <div className="mt-8 space-y-4">
-            {syllables.map((item) => (
+            {pinyinSyllables.map((item) => (
               <div
                 key={item.pinyin}
                 className="border border-[#242321]/20 p-6"
@@ -312,7 +224,7 @@ export default function SyllableLesson() {
           </h3>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {toneDescriptions.map((item) => (
+            {pinyinToneDescriptions.map((item) => (
               <div
                 key={item.name}
                 className="border border-[#242321]/20 p-6"

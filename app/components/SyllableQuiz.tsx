@@ -1,8 +1,14 @@
 
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { completeCourse } from "../data/courseProgress";
+import {
+  calculateQuizXP,
+  createLearningRecordId,
+  saveQuizResult,
+} from "../data/progress";
+import { COURSE_COMPLETION_XP } from "../data/xp";
 
 const questions = [
   {
@@ -127,6 +133,9 @@ export default function SyllableQuiz() {
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
   const [answered, setAnswered] = useState(false);
+  const [courseXPRewarded, setCourseXPRewarded] = useState(false);
+  const recordSaved = useRef(false);
+  const attemptId = useRef<string | null>(null);
 
   const question = questions[current];
   const isCorrect = selected === question.answer;
@@ -144,11 +153,25 @@ export default function SyllableQuiz() {
 
   function handleNext() {
     if (current === questions.length - 1) {
-      const finalScore = score;
-      const currentScore = finalScore + (isCorrect ? 1 : 0);
+      if (recordSaved.current) return;
+
+      recordSaved.current = true;
+      const currentAttemptId =
+        attemptId.current ?? createLearningRecordId();
+      attemptId.current = currentAttemptId;
+      const currentScore = score;
+
+      saveQuizResult({
+        id: currentAttemptId,
+        mode: "quiz",
+        score: currentScore,
+        total: questions.length,
+      });
 
       if (currentScore >= passedScore) {
-        completeCourse("syllables");
+        setCourseXPRewarded(completeCourse("syllables"));
+      } else {
+        setCourseXPRewarded(false);
       }
 
       setScore(currentScore);
@@ -162,6 +185,9 @@ export default function SyllableQuiz() {
   }
 
   function restart() {
+    recordSaved.current = false;
+    attemptId.current = null;
+    setCourseXPRewarded(false);
     setCurrent(0);
     setSelected("");
     setScore(0);
@@ -186,6 +212,16 @@ export default function SyllableQuiz() {
           <p className="mt-4 text-lg">
             {score} / {questions.length}
           </p>
+
+          <p className="mt-2 font-semibold text-[#B85F3D]">
+            +{calculateQuizXP(score)} XP
+          </p>
+
+          {courseXPRewarded && (
+            <p className="mt-1 text-sm text-[#242321]/60">
+              +{COURSE_COMPLETION_XP} XP — курсты аяқтағаныңыз үшін
+            </p>
+          )}
 
           <div className="mt-6 h-2 bg-[#242321]/10">
             <div

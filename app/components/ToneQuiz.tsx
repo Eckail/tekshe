@@ -1,10 +1,15 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { toneQuestions } from "../data/toneQuestions";
-import { saveLearningRecord } from "../data/progress";
+import {
+  calculateQuizXP,
+  createLearningRecordId,
+  saveQuizResult,
+} from "../data/progress";
 import { completeCourse } from "../data/courseProgress";
+import { COURSE_COMPLETION_XP } from "../data/xp";
 
 
 type ExerciseMode = "visual" | "listening";
@@ -27,42 +32,15 @@ export default function ToneQuiz() {
   const [answered, setAnswered] = useState(false);
   const [optionOrder, setOptionOrder] = useState([1, 2, 3, 4]);
   const [mode, setMode] = useState<ExerciseMode>("visual");
+  const [courseXPRewarded, setCourseXPRewarded] = useState(false);
 
   const recordSaved = useRef(false);
+  const attemptId = useRef<string | null>(null);
 
   const currentQuestion = toneQuestions[currentIndex];
   const isFinished = currentIndex >= toneQuestions.length;
 
-  const xp = score * 10 + 20;
-
-  useEffect(() => {
-    setOptionOrder(shuffleTones());
-  }, []);
-
-  useEffect(() => {
-    if (!isFinished || recordSaved.current) return;
-
-    recordSaved.current = true;
-
-    saveLearningRecord({
-  id: `${Date.now()}`,
-  date: new Date().toISOString(),
-  mode,
-  score,
-  total: toneQuestions.length,
-  xp,
-});
-
-// 让首页的学习数据自动刷新
-window.dispatchEvent(new Event("tekshe-progress-updated"));
-
-// 得分达到 75%，自动完成声调课程
-if (score >= Math.ceil(toneQuestions.length * 0.75)) {
-  completeCourse("tone-practice");
-}
-
-    
-  }, [isFinished, mode, score, xp]);
+  const xp = calculateQuizXP(score);
 
   function playPronunciation() {
     if (!("speechSynthesis" in window)) {
@@ -97,6 +75,28 @@ if (score >= Math.ceil(toneQuestions.length * 0.75)) {
   function handleNext() {
     window.speechSynthesis?.cancel();
 
+    if (currentIndex === toneQuestions.length - 1) {
+      if (recordSaved.current) return;
+
+      recordSaved.current = true;
+      const currentAttemptId =
+        attemptId.current ?? createLearningRecordId();
+      attemptId.current = currentAttemptId;
+      saveQuizResult({
+        id: currentAttemptId,
+        mode,
+        score,
+        total: toneQuestions.length,
+      });
+
+      const passed = score >= Math.ceil(toneQuestions.length * 0.75);
+      setCourseXPRewarded(
+        passed ? completeCourse("tone-practice") : false
+      );
+      setCurrentIndex(toneQuestions.length);
+      return;
+    }
+
     setCurrentIndex((prev) => prev + 1);
     setSelectedTone(null);
     setAnswered(false);
@@ -107,6 +107,8 @@ if (score >= Math.ceil(toneQuestions.length * 0.75)) {
     window.speechSynthesis?.cancel();
 
     recordSaved.current = false;
+    attemptId.current = null;
+    setCourseXPRewarded(false);
 
     setCurrentIndex(0);
     setSelectedTone(null);
@@ -156,6 +158,12 @@ if (score >= Math.ceil(toneQuestions.length * 0.75)) {
             Әр дұрыс жауап үшін 10 XP және
             жаттығуды аяқтағаныңыз үшін 20 XP.
           </p>
+
+          {courseXPRewarded && (
+            <p className="mt-3 text-sm font-medium text-[#B85F3D]">
+              +{COURSE_COMPLETION_XP} XP — курсты аяқтағаныңыз үшін
+            </p>
+          )}
         </div>
 
         <button

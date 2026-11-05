@@ -1,40 +1,28 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import {
   claimAchievement,
   getAchievements,
   type Achievement,
 } from "../data/achievements";
+import { createProgressStore } from "../data/progressStore";
+
+const achievementStore = createProgressStore<Achievement[]>(
+  getAchievements,
+  []
+);
 
 export default function Achievements() {
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
-
-  function refreshAchievements() {
-    setAchievements(getAchievements());
-  }
-
-  useEffect(() => {
-    refreshAchievements();
-
-    window.addEventListener(
-      "tekshe-progress-updated",
-      refreshAchievements
-    );
-
-    return () => {
-      window.removeEventListener(
-        "tekshe-progress-updated",
-        refreshAchievements
-      );
-    };
-  }, []);
+  const achievements = useSyncExternalStore(
+    achievementStore.subscribe,
+    achievementStore.getSnapshot,
+    achievementStore.getServerSnapshot
+  );
 
   function handleClaim(id: string) {
-    if (claimAchievement(id)) {
-      refreshAchievements();
-    }
+    claimAchievement(id);
   }
 
   const unlockedCount = achievements.filter(

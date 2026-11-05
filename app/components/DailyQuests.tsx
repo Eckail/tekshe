@@ -1,30 +1,28 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import {
   claimDailyQuest,
   getDailyQuests,
   type DailyQuest,
 } from "../data/dailyQuests";
+import { createProgressStore } from "../data/progressStore";
+
+const dailyQuestStore = createProgressStore<DailyQuest[]>(
+  getDailyQuests,
+  []
+);
 
 export default function DailyQuests() {
-  const [quests, setQuests] = useState<DailyQuest[]>([]);
-
-  function refreshQuests() {
-    setQuests(getDailyQuests());
-  }
-
-  useEffect(() => {
-    refreshQuests();
-  }, []);
+  const quests = useSyncExternalStore(
+    dailyQuestStore.subscribe,
+    dailyQuestStore.getSnapshot,
+    dailyQuestStore.getServerSnapshot
+  );
 
   function handleClaim(id: string) {
-    const success = claimDailyQuest(id);
-
-    if (success) {
-      refreshQuests();
-    }
+    claimDailyQuest(id);
   }
 
   const claimedCount = quests.filter((quest) => quest.claimed).length;
