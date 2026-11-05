@@ -1,6 +1,7 @@
 
 import { getLearningRecords } from "./progress";
 import { awardXP, getTotalXP, getXPForSource, hasXPAward } from "./xp";
+import { awardTekCoins, hasTekCoinTransaction, TEK_COIN_REWARDS } from "./tekCoins";
 
 export type Achievement = {
   id: string;
@@ -105,7 +106,9 @@ export function getAchievements(): Achievement[] {
     ...item,
     unlocked: allUnlocked.includes(item.id),
     claimed:
-      claimedIds.includes(item.id) || hasXPAward(`achievement:${item.id}`),
+      claimedIds.includes(item.id) ||
+      hasXPAward(`achievement:${item.id}`) ||
+      hasTekCoinTransaction(`achievement:${item.id}`),
   }));
 }
 
@@ -124,6 +127,13 @@ export function claimAchievement(id: string): boolean {
   const awarded = awardXP(awardId, "achievement", achievement.reward);
   if (!awarded && !hasXPAward(awardId)) return false;
 
+  const coinAwarded = awardTekCoins({
+    sourceActivityId: `achievement:${id}`,
+    source: "achievement",
+    amount: TEK_COIN_REWARDS.achievement,
+    description: `Жетістік ашылды: ${achievement.title}`,
+  });
+
   try {
     const saved: unknown = JSON.parse(
       window.localStorage.getItem(CLAIMED_KEY) || "[]"
@@ -140,7 +150,7 @@ export function claimAchievement(id: string): boolean {
     // The XP event is authoritative; getAchievements also checks it directly.
   }
 
-  return awarded;
+  return awarded || coinAwarded;
 }
 
 export function getTotalAchievementXP(): number {

@@ -229,10 +229,10 @@ export default function FirstWordsQuiz() {
   return (
     <section
       id="first-words-quiz"
-      className="border-t border-[#242321]/20 px-6 py-24 md:px-12"
+      className="border-t border-charcoal/20 px-6 py-24 md:px-12"
     >
       <div className="mx-auto max-w-3xl">
-        <p className="text-xs tracking-[0.25em] text-[#B85F3D]">
+        <p className="text-xs tracking-[0.25em] text-terracotta">
           04 / БІЛІМДІ ТЕКСЕРУ
         </p>
 
@@ -240,7 +240,7 @@ export default function FirstWordsQuiz() {
           Сөздік сынағы
         </h2>
 
-        <p className="mt-4 text-sm leading-7 text-[#242321]/60">
+        <p className="mt-4 text-sm leading-7 text-charcoal/60">
           Қазақша мағынаға сәйкес келетін қытай сөзін таңда.
           Келесі кезеңге өту үшін кемінде 9 сұраққа дұрыс жауап беру керек.
         </p>
@@ -252,15 +252,15 @@ export default function FirstWordsQuiz() {
               <span>{score} дұрыс жауап</span>
             </div>
 
-            <div className="mt-3 h-2 bg-[#242321]/10">
+            <div className="mt-3 h-2 bg-charcoal/10">
               <div
-                className="h-full bg-[#B85F3D] transition-all"
+                className="h-full bg-terracotta transition-all"
                 style={{ width: `${progress}%` }}
               />
             </div>
 
-            <div className="mt-10 border border-[#242321]/20 p-7 md:p-10">
-              <p className="text-sm text-[#242321]/50">
+            <div className="mt-10 border border-charcoal/20 p-7 md:p-10">
+              <p className="text-sm text-charcoal/50">
                 Мына сөздің қытайша аудармасын тап:
               </p>
 
@@ -274,7 +274,7 @@ export default function FirstWordsQuiz() {
                   const isSelected = selected === option.hanzi;
 
                   let style =
-                    "border-[#242321]/20 hover:border-[#B85F3D]";
+                    "border-charcoal/20 hover:border-terracotta";
 
                   if (selected !== null && isAnswer) {
                     style = "border-green-700 bg-green-700/10";
@@ -292,7 +292,7 @@ export default function FirstWordsQuiz() {
                       <span className="block text-3xl font-semibold">
                         {option.hanzi}
                       </span>
-                      <span className="mt-2 block text-sm text-[#B85F3D]">
+                      <span className="mt-2 block text-sm text-terracotta">
                         {option.pinyin}
                       </span>
                     </button>
@@ -301,20 +301,20 @@ export default function FirstWordsQuiz() {
               </div>
 
               {selected !== null && (
-                <div className="mt-6 border-t border-[#242321]/10 pt-5">
+                <div className="mt-6 border-t border-charcoal/10 pt-5">
                   <p className={`font-semibold ${
                     isCorrect ? "text-green-700" : "text-red-700"
                   }`}>
                     {isCorrect ? "Дұрыс жауап!" : "Қате жауап."}
                   </p>
 
-                  <p className="mt-2 text-sm text-[#242321]/70">
+                  <p className="mt-2 text-sm text-charcoal/70">
                     Дұрыс жауап: {question.answer} ({question.pinyin})
                   </p>
 
                   <button
                     onClick={nextQuestion}
-                    className="mt-6 w-full bg-[#242321] px-6 py-4 text-sm text-white transition hover:bg-[#B85F3D]"
+                    className="mt-6 w-full bg-charcoal px-6 py-4 text-sm text-white transition hover:bg-terracotta"
                   >
                     {current + 1 === questions.length
                       ? "Нәтижені көру"
@@ -325,8 +325,8 @@ export default function FirstWordsQuiz() {
             </div>
           </div>
         ) : (
-          <div className="mt-10 border border-[#242321]/20 p-8 text-center md:p-12">
-            <p className="text-xs tracking-[0.25em] text-[#B85F3D]">
+          <div className="mt-10 border border-charcoal/20 p-8 text-center md:p-12">
+            <p className="text-xs tracking-[0.25em] text-terracotta">
               TEST RESULTS
             </p>
 
@@ -334,12 +334,12 @@ export default function FirstWordsQuiz() {
               {score} / 12
             </h3>
 
-            <p className="mt-2 font-semibold text-[#B85F3D]">
+            <p className="mt-2 font-semibold text-terracotta">
               +{calculateQuizXP(score)} XP
             </p>
 
             {courseXPRewarded && (
-              <p className="mt-1 text-sm text-[#242321]/60">
+              <p className="mt-1 text-sm text-charcoal/60">
                 +{COURSE_COMPLETION_XP} XP — курсты аяқтағаныңыз үшін
               </p>
             )}
@@ -349,7 +349,7 @@ export default function FirstWordsQuiz() {
                 <p className="mt-6 text-2xl font-semibold">
                   Керемет! Кезең аяқталды.
                 </p>
-                <p className="mt-3 text-sm leading-7 text-[#242321]/65">
+                <p className="mt-3 text-sm leading-7 text-charcoal/65">
                   Сен сөздерді жақсы меңгердің. Келесі кезең ашылды!
                 </p>
                 <p className="mt-5 text-sm font-semibold text-green-700">
@@ -361,7 +361,7 @@ export default function FirstWordsQuiz() {
                 <p className="mt-6 text-2xl font-semibold">
                   Тағы бір рет байқап көр!
                 </p>
-                <p className="mt-3 text-sm leading-7 text-[#242321]/65">
+                <p className="mt-3 text-sm leading-7 text-charcoal/65">
                   Келесі кезеңге өту үшін кемінде 9 дұрыс жауап қажет.
                   Сөздерді қайталап, қайта сынақтан өт.
                 </p>
@@ -370,7 +370,7 @@ export default function FirstWordsQuiz() {
 
             <button
               onClick={restartQuiz}
-              className="mt-8 bg-[#242321] px-8 py-4 text-sm text-white transition hover:bg-[#B85F3D]"
+              className="mt-8 bg-charcoal px-8 py-4 text-sm text-white transition hover:bg-terracotta"
             >
               Қайта бастау
             </button>

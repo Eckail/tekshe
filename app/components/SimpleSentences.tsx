@@ -111,10 +111,10 @@ export default function SimpleSentences() {
   return (
     <section
       id="simple-sentences"
-      className="border-t border-[#242321]/20 px-6 py-24 md:px-12"
+      className="border-t border-charcoal/20 px-6 py-24 md:px-12"
     >
       <div className="mx-auto max-w-5xl">
-        <p className="text-xs tracking-[0.25em] text-[#B85F3D]">
+        <p className="text-xs tracking-[0.25em] text-terracotta">
           05 / СӨЙЛЕМ ҚҰРАСТЫРУ
         </p>
 
@@ -122,7 +122,7 @@ export default function SimpleSentences() {
           Алғашқы сөйлемдер
         </h2>
 
-        <p className="mt-6 max-w-2xl text-base leading-8 text-[#242321]/65">
+        <p className="mt-6 max-w-2xl text-base leading-8 text-charcoal/65">
           Бұл бөлімде қытай тіліндегі қарапайым сөйлемдердің құрылысын
           үйренесің. Сөздерді дұрыс ретпен орналастырып, өз ойыңды
           жеткізуді баста.
@@ -132,14 +132,14 @@ export default function SimpleSentences() {
           {lessons.map((lesson, index) => (
             <article
               key={lesson.title}
-              className="border border-[#242321]/20 p-6 md:p-8"
+              className="border border-charcoal/20 p-6 md:p-8"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs tracking-widest text-[#B85F3D]">
+                <p className="text-xs tracking-widest text-terracotta">
                   LESSON / 0{index + 1}
                 </p>
 
-                <span className="border border-[#242321]/15 px-3 py-2 text-xs">
+                <span className="border border-charcoal/15 px-3 py-2 text-xs">
                   Қытай грамматикасы
                 </span>
               </div>
@@ -148,13 +148,13 @@ export default function SimpleSentences() {
                 {lesson.title}
               </h3>
 
-              <div className="mt-5 inline-block bg-[#242321]/5 px-4 py-3">
+              <div className="mt-5 inline-block bg-charcoal/5 px-4 py-3">
                 <p className="text-sm font-medium">
                   {lesson.structure}
                 </p>
               </div>
 
-              <p className="mt-5 max-w-3xl text-sm leading-7 text-[#242321]/65">
+              <p className="mt-5 max-w-3xl text-sm leading-7 text-charcoal/65">
                 {lesson.explanation}
               </p>
 
@@ -162,25 +162,25 @@ export default function SimpleSentences() {
                 {lesson.examples.map((example) => (
                   <div
                     key={example.hanzi}
-                    className="flex flex-col justify-between gap-4 border-t border-[#242321]/10 py-5 sm:flex-row sm:items-center"
+                    className="flex flex-col justify-between gap-4 border-t border-charcoal/10 py-5 sm:flex-row sm:items-center"
                   >
                     <div>
                       <p className="text-3xl font-semibold">
                         {example.hanzi}
                       </p>
 
-                      <p className="mt-2 text-sm text-[#B85F3D]">
+                      <p className="mt-2 text-sm text-terracotta">
                         {example.pinyin}
                       </p>
 
-                      <p className="mt-2 text-sm text-[#242321]/65">
+                      <p className="mt-2 text-sm text-charcoal/65">
                         {example.translation}
                       </p>
                     </div>
 
                     <button
                       onClick={() => speak(example.hanzi)}
-                      className="self-start border border-[#242321]/20 px-4 py-3 text-sm transition hover:border-[#B85F3D] hover:text-[#B85F3D] sm:self-center"
+                      className="self-start border border-charcoal/20 px-4 py-3 text-sm transition hover:border-terracotta hover:text-terracotta sm:self-center"
                     >
                       🔊 Тыңдау
                     </button>
@@ -191,12 +191,12 @@ export default function SimpleSentences() {
           ))}
         </div>
 
-        <div className="mt-12 border-l-2 border-[#B85F3D] bg-[#242321]/5 p-6">
+        <div className="mt-12 border-l-2 border-terracotta bg-charcoal/5 p-6">
           <h3 className="text-lg font-semibold">
             Есте сақта
           </h3>
 
-          <p className="mt-3 text-sm leading-7 text-[#242321]/70">
+          <p className="mt-3 text-sm leading-7 text-charcoal/70">
             Қытай тілінде сөздердің орны өте маңызды. Алдымен сөйлемнің
             құрылысын түсін. Содан кейін сөздерді дұрыс ретпен қолданып,
             сөйлемді дауыстап оқы.

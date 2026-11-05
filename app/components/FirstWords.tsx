@@ -144,11 +144,11 @@ export default function FirstWords() {
   return (
     <section
       id="first-words"
-      className="border-t border-[#242321]/20 px-6 py-24 md:px-12"
+      className="border-t border-charcoal/20 px-6 py-24 md:px-12"
     >
       <div className="mx-auto max-w-5xl">
         <div>
-          <p className="text-xs tracking-[0.25em] text-[#B85F3D]">
+          <p className="text-xs tracking-[0.25em] text-terracotta">
             04 / СӨЗДІК ҚОР
           </p>
 
@@ -156,7 +156,7 @@ export default function FirstWords() {
             Алғашқы сөздер
           </h2>
 
-          <p className="mt-6 max-w-2xl text-base leading-8 text-[#242321]/65">
+          <p className="mt-6 max-w-2xl text-base leading-8 text-charcoal/65">
             Бұл бөлімде күнделікті өмірде жиі қолданылатын қытай сөздерін
             үйренесің. Әр сөздің иероглифін, пиньинь жазылуын және
             қазақша мағынасын қарастыр. Дыбыстап тыңдап, мысал сөйлемдерді
@@ -172,8 +172,8 @@ export default function FirstWords() {
               onClick={() => setActiveCategory(index)}
               className={`border px-5 py-3 text-sm transition ${
                 activeCategory === index
-                  ? "border-[#B85F3D] bg-[#B85F3D] text-white"
-                  : "border-[#242321]/20 hover:border-[#B85F3D]"
+                  ? "border-terracotta bg-terracotta text-white"
+                  : "border-charcoal/20 hover:border-terracotta"
               }`}
             >
               {category.category}
@@ -189,16 +189,16 @@ export default function FirstWords() {
             return (
               <div
                 key={word.hanzi}
-                className="border border-[#242321]/20 p-6 transition hover:border-[#B85F3D]/60"
+                className="border border-charcoal/20 p-6 transition hover:border-terracotta/60"
               >
                 <div className="flex items-start justify-between">
-                  <span className="text-xs tracking-widest text-[#B85F3D]">
+                  <span className="text-xs tracking-widest text-terracotta">
                     WORD / {String(index + 1).padStart(2, "0")}
                   </span>
 
                   <button
                     onClick={() => speak(word.hanzi)}
-                    className="border border-[#242321]/20 px-3 py-2 text-sm transition hover:border-[#B85F3D] hover:text-[#B85F3D]"
+                    className="border border-charcoal/20 px-3 py-2 text-sm transition hover:border-terracotta hover:text-terracotta"
                     aria-label={`听取${word.hanzi}的发音`}
                   >
                     🔊 Тыңдау
@@ -208,15 +208,15 @@ export default function FirstWords() {
                 <div className="mt-8">
                   <p className="text-5xl font-semibold">{word.hanzi}</p>
 
-                  <p className="mt-3 text-lg tracking-wide text-[#B85F3D]">
+                  <p className="mt-3 text-lg tracking-wide text-terracotta">
                     {word.pinyin}
                   </p>
                 </div>
 
-                <div className="mt-6 border-t border-[#242321]/10 pt-5">
+                <div className="mt-6 border-t border-charcoal/10 pt-5">
                   <button
                     onClick={() => toggleReveal(word.hanzi)}
-                    className="text-sm font-medium text-[#B85F3D]"
+                    className="text-sm font-medium text-terracotta"
                   >
                     {isRevealed
                       ? "Мағынасын жасыру −"
@@ -229,19 +229,19 @@ export default function FirstWords() {
                         {word.meaning}
                       </p>
 
-                      <p className="mt-5 text-sm text-[#242321]/50">
+                      <p className="mt-5 text-sm text-charcoal/50">
                         Мысал сөйлем
                       </p>
 
                       <p className="mt-2 text-xl">{word.example}</p>
 
-                      <p className="mt-2 text-sm text-[#242321]/65">
+                      <p className="mt-2 text-sm text-charcoal/65">
                         {word.translation}
                       </p>
 
                       <button
                         onClick={() => speak(word.example)}
-                        className="mt-4 border border-[#242321]/20 px-3 py-2 text-sm transition hover:border-[#B85F3D] hover:text-[#B85F3D]"
+                        className="mt-4 border border-charcoal/20 px-3 py-2 text-sm transition hover:border-terracotta hover:text-terracotta"
                       >
                         🔊 Сөйлемді тыңдау
                       </button>
@@ -254,10 +254,10 @@ export default function FirstWords() {
         </div>
 
         {/* Оқу нұсқаулығы */}
-        <div className="mt-12 border-l-2 border-[#B85F3D] bg-[#242321]/5 p-6">
+        <div className="mt-12 border-l-2 border-terracotta bg-charcoal/5 p-6">
           <h3 className="text-lg font-semibold">Оқу тәсілі</h3>
 
-          <p className="mt-3 text-sm leading-7 text-[#242321]/70">
+          <p className="mt-3 text-sm leading-7 text-charcoal/70">
             Алдымен иероглифке қара. Содан кейін пиньинь бойынша
             дыбысталуын тыңда. Қазақша мағынасын есіңе түсіріп көр.
             Соңында мысал сөйлемді дауыстап оқы.

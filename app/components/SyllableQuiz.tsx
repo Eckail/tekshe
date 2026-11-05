@@ -199,9 +199,9 @@ export default function SyllableQuiz() {
     const passed = score >= passedScore;
 
     return (
-      <section className="border-t border-[#242321]/20 px-6 py-20 md:px-12">
-        <div className="mx-auto max-w-3xl border border-[#242321]/20 p-8 md:p-12">
-          <p className="text-xs tracking-[0.2em] text-[#B85F3D]">
+      <section className="border-t border-charcoal/20 px-6 py-20 md:px-12">
+        <div className="mx-auto max-w-3xl border border-charcoal/20 p-8 md:p-12">
+          <p className="text-xs tracking-[0.2em] text-terracotta">
             03 / НӘТИЖЕ
           </p>
 
@@ -213,26 +213,26 @@ export default function SyllableQuiz() {
             {score} / {questions.length}
           </p>
 
-          <p className="mt-2 font-semibold text-[#B85F3D]">
+          <p className="mt-2 font-semibold text-terracotta">
             +{calculateQuizXP(score)} XP
           </p>
 
           {courseXPRewarded && (
-            <p className="mt-1 text-sm text-[#242321]/60">
+            <p className="mt-1 text-sm text-charcoal/60">
               +{COURSE_COMPLETION_XP} XP — курсты аяқтағаныңыз үшін
             </p>
           )}
 
-          <div className="mt-6 h-2 bg-[#242321]/10">
+          <div className="mt-6 h-2 bg-charcoal/10">
             <div
-              className="h-full bg-[#B85F3D]"
+              className="h-full bg-terracotta"
               style={{
                 width: `${(score / questions.length) * 100}%`,
               }}
             />
           </div>
 
-          <p className="mt-6 text-sm leading-7 text-[#242321]/65">
+          <p className="mt-6 text-sm leading-7 text-charcoal/65">
             {passed
               ? "Сен қытай буынының құрылысын меңгердің. Келесі курс ашылды!"
               : `Курсты аяқтау үшін кемінде ${passedScore} сұраққа дұрыс жауап беру керек. Қайта дайындалып көр!`}
@@ -240,7 +240,7 @@ export default function SyllableQuiz() {
 
           <button
             onClick={restart}
-            className="mt-8 bg-[#B85F3D] px-6 py-3 text-sm text-white transition hover:bg-[#242321]"
+            className="mt-8 bg-terracotta px-6 py-3 text-sm text-white transition hover:bg-charcoal"
           >
             Қайта орындау
           </button>
@@ -250,10 +250,10 @@ export default function SyllableQuiz() {
   }
 
   return (
-    <section className="border-t border-[#242321]/20 px-6 py-20 md:px-12">
+    <section className="border-t border-charcoal/20 px-6 py-20 md:px-12">
       <div className="mx-auto max-w-3xl">
         <div className="flex items-center justify-between">
-          <p className="text-xs tracking-[0.2em] text-[#B85F3D]">
+          <p className="text-xs tracking-[0.2em] text-terracotta">
             03 / БІЛІМДІ ТЕКСЕРУ
           </p>
           <p className="text-sm">
@@ -261,9 +261,9 @@ export default function SyllableQuiz() {
           </p>
         </div>
 
-        <div className="mt-5 h-1 bg-[#242321]/10">
+        <div className="mt-5 h-1 bg-charcoal/10">
           <div
-            className="h-full bg-[#B85F3D] transition-all"
+            className="h-full bg-terracotta transition-all"
             style={{
               width: `${((current + 1) / questions.length) * 100}%`,
             }}
@@ -291,8 +291,8 @@ export default function SyllableQuiz() {
                     : wrong
                       ? "border-red-700 bg-red-700/10"
                       : active
-                        ? "border-[#B85F3D] bg-[#B85F3D]/10"
-                        : "border-[#242321]/20 hover:border-[#B85F3D]"
+                        ? "border-terracotta bg-terracotta/10"
+                        : "border-charcoal/20 hover:border-terracotta"
                 }`}
               >
                 {option}
@@ -308,11 +308,11 @@ export default function SyllableQuiz() {
         </div>
 
         {answered && (
-          <div className="mt-6 border-l-2 border-[#B85F3D] bg-[#242321]/5 p-5">
+          <div className="mt-6 border-l-2 border-terracotta bg-charcoal/5 p-5">
             <p className="font-semibold">
               {isCorrect ? "Дұрыс жауап!" : "Дұрыс жауап: " + question.answer}
             </p>
-            <p className="mt-3 text-sm leading-7 text-[#242321]/70">
+            <p className="mt-3 text-sm leading-7 text-charcoal/70">
               {question.explanation}
             </p>
           </div>
@@ -322,14 +322,14 @@ export default function SyllableQuiz() {
           <button
             onClick={handleAnswer}
             disabled={!selected}
-            className="mt-8 bg-[#B85F3D] px-8 py-3 text-sm text-white transition hover:bg-[#242321] disabled:cursor-not-allowed disabled:opacity-30"
+            className="mt-8 bg-terracotta px-8 py-3 text-sm text-white transition hover:bg-charcoal disabled:cursor-not-allowed disabled:opacity-30"
           >
             Жауапты тексеру
           </button>
         ) : (
           <button
             onClick={handleNext}
-            className="mt-8 bg-[#B85F3D] px-8 py-3 text-sm text-white transition hover:bg-[#242321]"
+            className="mt-8 bg-terracotta px-8 py-3 text-sm text-white transition hover:bg-charcoal"
           >
             {current === questions.length - 1
               ? "Нәтижені көру"

@@ -72,3 +72,21 @@
 - Kazakh explanations and translations are editorial drafts and still require native-editor review.
 - Listening items use browser speech synthesis with zh-CN; pronunciation depends on available system voices.
 - The HSK 1 dataset contains 29 words and is only a starter subset, not the full level list.
+
+## 2026-11-05 — Product UI redesign and mobile beta foundation
+
+### Added
+
+- Route-based dashboard, learning center, Pinyin and HSK module/lesson pages, practice, progress, wallet, and profile.
+- Responsive shared navigation, Tekshe design tokens, reusable page and icon components, and a locally remembered learning route.
+- Versioned Tek Coin transaction ledger and wallet page, keeping coins separate from XP and preserving existing XP migration.
+- Web manifest, SVG app icon, mobile metadata, offline fallback, and a production-only network-first service worker.
+
+### Verification
+
+- ESLint: passed.
+- TypeScript (`npx tsc --noEmit --incremental false`): passed.
+- Next.js production build: passed; all new route entries generated.
+- XP, curriculum, progress, and wallet tests: 14 passed.
+- Local HTTP checks returned 200 for the primary routes and PWA assets, with 404 for invalid routes. No browser automation is available in this environment, so actual phone viewport, logged-out Preview, PWA installability, and offline behavior remain unverified.
+- No Production deployment was triggered.

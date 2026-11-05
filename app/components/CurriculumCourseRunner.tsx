@@ -13,11 +13,22 @@ import {
 import { completeCourse } from "../data/courseProgress";
 import { awardXP, COURSE_COMPLETION_XP } from "../data/xp";
 import type { CourseId } from "../data/courseProgress";
+import Link from "next/link";
+import {
+  awardCourseMilestoneCoins,
+  awardLessonCoins,
+  hasTekCoinTransaction,
+  TEK_COIN_REWARDS,
+} from "../data/tekCoins";
 
 type Props = {
   curriculum: Curriculum;
   sectionId?: string;
   legacyCourseId?: CourseId;
+  initialLessonId?: string;
+  singleLessonMode?: boolean;
+  lessonPathPrefix?: string;
+  moduleHref?: string;
 };
 
 function answerIsCorrect(exercise: CurriculumExercise, selected: string): boolean {
@@ -45,17 +56,25 @@ export default function CurriculumCourseRunner({
   curriculum,
   sectionId,
   legacyCourseId,
+  initialLessonId,
+  singleLessonMode = false,
+  lessonPathPrefix,
+  moduleHref,
 }: Props) {
   const lessonIds = useMemo(
     () => curriculum.lessons.map(({ id }) => id),
     [curriculum.lessons]
   );
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(() => {
+    const found = curriculum.lessons.findIndex((lesson) => lesson.id === initialLessonId);
+    return found >= 0 ? found : 0;
+  });
   const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([]);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
   const [exerciseResults, setExerciseResults] = useState<Record<string, boolean>>({});
   const [audioNotice, setAudioNotice] = useState("");
   const [progressNotice, setProgressNotice] = useState("");
+  const [rewardNotice, setRewardNotice] = useState("");
 
   useEffect(() => {
     const updateProgress = () => {
@@ -89,6 +108,9 @@ export default function CurriculumCourseRunner({
     .map((id) => vocabularyById.get(id))
     .filter((entry): entry is VocabularyEntry => Boolean(entry));
   const activeLessonComplete = completedLessonIds.includes(activeLesson.id);
+  const activeLessonLocked = activeLesson.prerequisites.some(
+    (prerequisite) => !completedLessonIds.includes(prerequisite)
+  );
   const allExercisesCorrect =
     lessonExercises.length > 0 &&
     lessonExercises.every((exercise) => exerciseResults[exercise.id] === true);
@@ -140,19 +162,46 @@ export default function CurriculumCourseRunner({
       setProgressNotice("Сабақтың барысын сақтау мүмкін болмады. Қайталап көріңіз.");
       return;
     }
+    awardLessonCoins(curriculum.id, activeLesson.id);
+    if (result.courseCompleted) awardCourseMilestoneCoins(curriculum.id);
+
+    const lessonCoinSaved = hasTekCoinTransaction(`lesson:${curriculum.id}:${activeLesson.id}`);
+    const milestoneCoinSaved = result.courseCompleted && hasTekCoinTransaction(`milestone:${curriculum.id}:complete`);
+    const rewardMessages = [
+      lessonCoinSaved
+        ? `+${TEK_COIN_REWARDS.lesson} Tek Coin`
+        : "Tek Coin жазбасын сақтау мүмкін болмады",
+      milestoneCoinSaved ? `+${TEK_COIN_REWARDS.milestone} курс межесі` : "",
+      result.xpAwarded ? `+${COURSE_COMPLETION_XP} XP ішкі ілгерілеуге` : "",
+    ].filter(Boolean);
     setProgressNotice("");
+    setRewardNotice(`Сабақ сақталды. ${rewardMessages.join(" · ")}`);
     setCompletedLessonIds(result.completedLessonIds);
+  }
+
+  if (singleLessonMode && activeLessonLocked) {
+    return (
+      <section className="py-2" aria-labelledby={`${activeLesson.id}-locked-title`}>
+        <div className="rounded-xl border border-charcoal/10 bg-paper p-5 sm:p-7">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-terracotta">САБАҚ ҚҰЛЫПТАУЛЫ</p>
+          <h2 id={`${activeLesson.id}-locked-title`} className="mt-2 text-xl font-semibold">Алдыңғы сабақты аяқтаңыз</h2>
+          <p className="mt-2 text-sm leading-6 text-charcoal/65">Бұл сабақтың алғышарты әлі орындалмаған.</p>
+          {moduleHref && <Link href={moduleHref} className="mt-5 inline-flex min-h-11 items-center rounded-lg bg-charcoal px-4 text-sm font-semibold text-white hover:bg-terracotta">Курс тізіміне оралу</Link>}
+        </div>
+      </section>
+    );
   }
 
   return (
     <section
       id={sectionId ?? curriculum.id}
-      className="border-t border-[#242321]/20 px-6 py-20 md:px-12"
-      aria-labelledby={`${curriculum.id}-title`}
+      className={`border-t border-charcoal/10 ${singleLessonMode ? "py-2" : "py-10 md:py-14"}`}
+      aria-labelledby={singleLessonMode ? `${curriculum.id}-lesson-route-title` : `${curriculum.id}-title`}
     >
       <div className="mx-auto max-w-6xl">
-        <div className="mb-10 max-w-4xl">
-          <p className="text-xs tracking-[0.22em] text-[#B85F3D]">
+        {singleLessonMode && <h2 id={`${curriculum.id}-lesson-route-title`} className="sr-only">{curriculum.title}</h2>}
+        {!singleLessonMode && <div className="mb-10 max-w-4xl">
+          <p className="text-xs tracking-[0.22em] text-terracotta">
             VERSIONED CURRICULUM · {curriculum.version}
           </p>
           <h2
@@ -162,23 +211,23 @@ export default function CurriculumCourseRunner({
             {curriculum.title}
           </h2>
           {curriculum.descriptionKazakh && (
-            <p className="mt-4 text-base leading-7 text-[#242321]/70">
+            <p className="mt-4 text-base leading-7 text-charcoal/70">
               {curriculum.descriptionKazakh}
             </p>
           )}
           {curriculum.editorialNoteKazakh && (
-            <p className="mt-5 border-l-2 border-[#B85F3D] bg-[#B85F3D]/5 px-4 py-3 text-sm leading-6 text-[#242321]/70">
+            <p className="mt-5 border-l-2 border-terracotta bg-terracotta/5 px-4 py-3 text-sm leading-6 text-charcoal/70">
               {curriculum.editorialNoteKazakh}
             </p>
           )}
-        </div>
+        </div>}
 
-        <div className="mb-8 flex flex-col gap-3 border-y border-[#242321]/15 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className={`mb-5 flex flex-col gap-3 border-y border-charcoal/10 py-4 sm:flex-row sm:items-center sm:justify-between ${singleLessonMode ? "mt-2" : ""}`}>
           <p className="text-sm font-medium">
             Орындалған сабақ: {completedLessonIds.length} / {lessonIds.length}
           </p>
           <div
-            className="h-2 w-full overflow-hidden rounded-full bg-[#242321]/10 sm:max-w-xs"
+            className="h-1.5 w-full overflow-hidden rounded-full bg-charcoal/10 sm:max-w-xs"
             role="progressbar"
             aria-label="Курс барысы"
             aria-valuemin={0}
@@ -186,18 +235,18 @@ export default function CurriculumCourseRunner({
             aria-valuenow={progressPercent}
           >
             <div
-              className="h-full bg-[#B85F3D] transition-[width]"
+              className="h-full bg-terracotta transition-[width]"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
           {courseComplete && (
-            <span className="text-sm font-semibold text-[#B85F3D]">
-              Курс аяқталды · бір реттік +{COURSE_COMPLETION_XP} XP
+            <span className="text-sm font-semibold text-steppe">
+              Курс аяқталды · +{TEK_COIN_REWARDS.milestone} Tek Coin
             </span>
           )}
         </div>
 
-        <nav
+        {!singleLessonMode && <nav
           aria-label={`${curriculum.title} сабақтары`}
           className="mb-8 grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
         >
@@ -213,10 +262,10 @@ export default function CurriculumCourseRunner({
                 aria-label={!unlocked ? `${lesson.title} — алдымен алдыңғы сабақты аяқтаңыз` : undefined}
                 aria-current={active ? "step" : undefined}
                 onClick={() => setActiveIndex(index)}
-                className={`min-h-16 border px-4 py-3 text-left text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B85F3D] disabled:cursor-not-allowed disabled:opacity-45 ${
+                className={`min-h-16 border px-4 py-3 text-left text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta disabled:cursor-not-allowed disabled:opacity-45 ${
                   active
-                    ? "border-[#B85F3D] bg-[#B85F3D] text-white"
-                    : "border-[#242321]/20 hover:border-[#B85F3D]"
+                    ? "border-terracotta bg-terracotta text-white"
+                    : "border-charcoal/20 hover:border-terracotta"
                 }`}
               >
                 <span className="mr-2 font-semibold">
@@ -226,16 +275,16 @@ export default function CurriculumCourseRunner({
               </button>
             );
           })}
-        </nav>
+        </nav>}
 
         <article
           id={activeLesson.id}
-          className="border border-[#242321]/20 bg-[#F3EDE1] p-5 md:p-8"
+          className="rounded-xl border border-charcoal/10 bg-paper p-4 sm:p-6 md:p-8"
           aria-labelledby={`${activeLesson.id}-title`}
         >
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-xs tracking-[0.2em] text-[#B85F3D]">
+              <p className="text-xs tracking-[0.2em] text-terracotta">
                 САБАҚ {activeIndex + 1} / {curriculum.lessons.length}
               </p>
               <h3
@@ -246,22 +295,22 @@ export default function CurriculumCourseRunner({
               </h3>
             </div>
             {activeLessonComplete && (
-              <span className="rounded-full border border-[#B85F3D]/40 px-4 py-2 text-sm font-medium text-[#B85F3D]">
+              <span className="rounded-full border border-terracotta/40 px-4 py-2 text-sm font-medium text-terracotta">
                 Аяқталды ✓
               </span>
             )}
           </div>
 
           {activeLesson.introductionKazakh && (
-            <p className="mt-4 max-w-4xl text-sm leading-7 text-[#242321]/70">
+            <p className="mt-4 max-w-4xl text-sm leading-7 text-charcoal/70">
               {activeLesson.introductionKazakh}
             </p>
           )}
 
           <div className="mt-7 grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
-            <div className="border border-[#242321]/15 p-5">
+            <div className="border border-charcoal/15 p-5">
               <h4 className="font-semibold">Оқу мақсаттары</h4>
-              <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-[#242321]/70">
+              <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-charcoal/70">
                 {activeLesson.learningObjectives.map((objective) => (
                   <li key={objective}>{objective}</li>
                 ))}
@@ -269,15 +318,15 @@ export default function CurriculumCourseRunner({
             </div>
             <div className="space-y-4">
               {activeLesson.teachingSections?.map((section) => (
-                <section key={section.id} className="border border-[#242321]/15 p-5">
+                <section key={section.id} className="border border-charcoal/15 p-5">
                   <h4 className="font-semibold">{section.title}</h4>
-                  <p className="mt-3 text-sm leading-7 text-[#242321]/70">
+                  <p className="mt-3 text-sm leading-7 text-charcoal/70">
                     {section.explanationKazakh}
                   </p>
                   {section.items && section.items.length > 0 && (
                     <ul className="mt-4 grid gap-2 sm:grid-cols-2">
                       {section.items.map((item) => (
-                        <li key={item} className="break-words bg-[#242321]/5 px-3 py-2 text-sm">
+                        <li key={item} className="break-words bg-charcoal/5 px-3 py-2 text-sm">
                           {item}
                         </li>
                       ))}
@@ -289,7 +338,7 @@ export default function CurriculumCourseRunner({
                         <div key={`${section.id}-${example.hanzi}-${example.pinyin}`} className="bg-white/45 p-3">
                           <p className="text-xl font-semibold">{example.hanzi}</p>
                           <p className="mt-1 text-sm">{example.pinyin}</p>
-                          <p className="mt-1 text-xs text-[#242321]/60">{example.translationKazakh}</p>
+                          <p className="mt-1 text-xs text-charcoal/60">{example.translationKazakh}</p>
                         </div>
                       ))}
                     </div>
@@ -306,19 +355,19 @@ export default function CurriculumCourseRunner({
               </h4>
               <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {lessonVocabulary.map((entry) => (
-                  <article key={entry.id} className="border border-[#242321]/15 p-4">
+                  <article key={entry.id} className="border border-charcoal/15 p-4">
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
                       <p className="text-2xl font-semibold">{entry.hanzi}</p>
-                      <span className="text-xs uppercase tracking-wider text-[#B85F3D]">
+                      <span className="text-xs uppercase tracking-wider text-terracotta">
                         {partOfSpeechLabels[entry.partOfSpeech] ?? entry.partOfSpeech}
                       </span>
                     </div>
                     <p className="mt-1 text-lg">{entry.pinyin}</p>
-                    <p className="mt-1 text-sm text-[#242321]/70">{entry.translationKazakh}</p>
-                    <div className="mt-4 border-t border-[#242321]/10 pt-3">
+                    <p className="mt-1 text-sm text-charcoal/70">{entry.translationKazakh}</p>
+                    <div className="mt-4 border-t border-charcoal/10 pt-3">
                       <p className="text-lg font-medium">{entry.example.hanzi}</p>
                       <p className="mt-1 text-sm">{entry.example.pinyin}</p>
-                      <p className="mt-1 text-xs leading-5 text-[#242321]/60">
+                      <p className="mt-1 text-xs leading-5 text-charcoal/60">
                         {entry.example.translationKazakh}
                       </p>
                     </div>
@@ -328,15 +377,15 @@ export default function CurriculumCourseRunner({
             </section>
           )}
 
-          <section className="mt-10 border-t border-[#242321]/15 pt-7" aria-labelledby={`${activeLesson.id}-practice`}>
+          <section className="mt-10 border-t border-charcoal/15 pt-7" aria-labelledby={`${activeLesson.id}-practice`}>
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="text-xs tracking-[0.2em] text-[#B85F3D]">ТҮСІНІКТІ ТЕКСЕРУ</p>
+                <p className="text-xs tracking-[0.2em] text-terracotta">ТҮСІНІКТІ ТЕКСЕРУ</p>
                 <h4 id={`${activeLesson.id}-practice`} className="mt-2 text-xl font-semibold">
                   Жаттығу және кері байланыс
                 </h4>
               </div>
-              <span className="text-xs text-[#242321]/55">
+              <span className="text-xs text-charcoal/55">
                 {lessonExercises.filter((exercise) => exerciseResults[exercise.id]).length} / {lessonExercises.length} дұрыс
               </span>
             </div>
@@ -346,8 +395,8 @@ export default function CurriculumCourseRunner({
                 const result = exerciseResults[exercise.id];
                 const selected = selectedAnswers[exercise.id];
                 return (
-                  <fieldset key={exercise.id} className="min-w-0 border border-[#242321]/15 p-5">
-                    <legend className="px-2 text-xs tracking-wide text-[#242321]/55">
+                  <fieldset key={exercise.id} className="min-w-0 border border-charcoal/15 p-5">
+                    <legend className="px-2 text-xs tracking-wide text-charcoal/55">
                       ЖАТТЫҒУ {index + 1} · {exercise.type === "listening-selection" ? "ТЫҢДАУ" : "ТАҢДАУ"}
                     </legend>
                     <p className="mt-1 font-medium leading-6">{exercise.prompt}</p>
@@ -355,7 +404,7 @@ export default function CurriculumCourseRunner({
                       <button
                         type="button"
                         onClick={() => playAudio(exercise.audioText ?? "")}
-                        className="mt-3 rounded-full border border-[#242321]/25 px-4 py-2 text-sm transition hover:border-[#B85F3D] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B85F3D]"
+                        className="mt-3 rounded-full border border-charcoal/25 px-4 py-2 text-sm transition hover:border-terracotta focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta"
                       >
                         Қытайша тыңдау 🔊
                       </button>
@@ -374,10 +423,10 @@ export default function CurriculumCourseRunner({
                               return next;
                             });
                           }}
-                          className={`min-h-11 rounded-sm border px-3 py-2 text-left text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B85F3D] ${
+                          className={`min-h-11 rounded-sm border px-3 py-2 text-left text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta ${
                             selected === option
-                              ? "border-[#B85F3D] bg-[#B85F3D]/10"
-                              : "border-[#242321]/15 hover:border-[#B85F3D]/70"
+                              ? "border-terracotta bg-terracotta/10"
+                              : "border-charcoal/15 hover:border-terracotta/70"
                           }`}
                         >
                           {option}
@@ -388,12 +437,12 @@ export default function CurriculumCourseRunner({
                       type="button"
                       disabled={!selected}
                       onClick={() => checkAnswer(exercise)}
-                      className="mt-4 rounded-full bg-[#242321] px-5 py-2.5 text-sm text-white transition hover:bg-[#B85F3D] disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B85F3D]"
+                      className="mt-4 rounded-full bg-charcoal px-5 py-2.5 text-sm text-white transition hover:bg-terracotta disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta"
                     >
                       Жауапты тексеру
                     </button>
                     {result !== undefined && (
-                      <p aria-live="polite" className={`mt-3 text-sm leading-6 ${result ? "text-green-800" : "text-[#9B3E28]"}`}>
+                      <p aria-live="polite" className={`mt-3 text-sm leading-6 ${result ? "text-green-800" : "text-danger"}`}>
                         {result ? "Дұрыс! " : "Әлі дұрыс емес. "}{exercise.explanationKazakh}
                       </p>
                     )}
@@ -401,28 +450,43 @@ export default function CurriculumCourseRunner({
                 );
               })}
             </div>
-            {audioNotice && <p aria-live="polite" className="mt-3 text-xs text-[#242321]/55">{audioNotice}</p>}
+            {audioNotice && <p aria-live="polite" className="mt-3 text-xs text-charcoal/55">{audioNotice}</p>}
           </section>
 
-          <div className="mt-8 flex flex-col gap-4 border-t border-[#242321]/15 pt-6 sm:flex-row sm:items-center sm:justify-between">
-            <p aria-live="polite" className="text-sm text-[#242321]/65">
+          <div className="mt-8 flex flex-col gap-4 border-t border-charcoal/15 pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <p aria-live="polite" className="text-sm text-charcoal/65">
               {activeLessonComplete
                 ? "Бұл сабақтың орындалуы сақталды. Қайталап оқуға болады."
                 : allExercisesCorrect
                   ? "Барлық жаттығу дұрыс орындалды. Сабақты аяқтап, барысты сақтаңыз."
                   : "Сабақты аяқтау үшін барлық жаттығуға дұрыс жауап беріңіз."}
-              {progressNotice && <span className="mt-1 block text-[#9B3E28]">{progressNotice}</span>}
+              {progressNotice && <span className="mt-1 block text-danger">{progressNotice}</span>}
+              {rewardNotice && <span className="mt-1 block font-semibold text-steppe">{rewardNotice}</span>}
             </p>
             <button
               type="button"
               disabled={!allExercisesCorrect || activeLessonComplete}
               onClick={completeLesson}
-              className="min-h-12 shrink-0 rounded-full bg-[#B85F3D] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#242321] disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B85F3D]"
+              className="min-h-12 shrink-0 rounded-lg bg-terracotta px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-charcoal disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {activeLessonComplete ? "Сабақ аяқталды ✓" : "Сабақты аяқтау"}
+              {activeLessonComplete ? "Сабақ аяқталды ✓" : `Сабақты аяқтау · +${TEK_COIN_REWARDS.lesson} Tek Coin`}
             </button>
           </div>
         </article>
+
+        {singleLessonMode && lessonPathPrefix && moduleHref && (
+          <nav className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" aria-label="Сабақ навигациясы">
+            <Link href={moduleHref} className="min-h-11 inline-flex items-center text-sm font-semibold text-charcoal/70 underline-offset-4 hover:text-terracotta hover:underline">Курс тізіміне оралу</Link>
+            <div className="flex gap-2">
+              {activeIndex > 0 && <Link href={`${lessonPathPrefix}/${curriculum.lessons[activeIndex - 1].id}`} className="min-h-11 inline-flex items-center rounded-lg border border-charcoal/15 px-4 text-sm font-medium hover:border-terracotta/50">Алдыңғы сабақ</Link>}
+              {activeIndex < curriculum.lessons.length - 1 && (
+                activeLessonComplete
+                  ? <Link href={`${lessonPathPrefix}/${curriculum.lessons[activeIndex + 1].id}`} className="min-h-11 inline-flex items-center gap-2 rounded-lg bg-charcoal px-4 text-sm font-semibold text-white hover:bg-terracotta">Келесі сабақ <span aria-hidden="true">→</span></Link>
+                  : <span aria-disabled="true" className="min-h-11 inline-flex items-center rounded-lg bg-charcoal/10 px-4 text-sm font-medium text-charcoal/45">Келесі сабақ құлыптаулы</span>
+              )}
+            </div>
+          </nav>
+        )}
       </div>
     </section>
   );

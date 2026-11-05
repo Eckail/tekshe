@@ -23,7 +23,7 @@ const stageDefinitions: LearningStage[] = [
     title: "Пиньинь негіздері",
     subtitle: "PINYIN BASICS",
     description: "Қытай тілінің дыбыстары мен әріптерін үйреніңіз.",
-    href: "#pinyin-basics",
+    href: "/learn/pinyin",
   },
   {
     id: 2,
@@ -31,7 +31,7 @@ const stageDefinitions: LearningStage[] = [
     title: "Төрт тон",
     subtitle: "FOUR TONES",
     description: "Қытай тіліндегі төрт негізгі тонды ажыратыңыз.",
-    href: "#tone-practice",
+    href: "/practice#tone-practice",
   },
   {
     id: 3,
@@ -39,7 +39,7 @@ const stageDefinitions: LearningStage[] = [
     title: "Буындар",
     subtitle: "SYLLABLES",
     description: "Бастапқы дыбыстар мен соңғы дыбыстарды біріктіріңіз.",
-    href: "#syllables",
+    href: "/practice#syllables",
   },
   {
     id: 4,
@@ -47,7 +47,7 @@ const stageDefinitions: LearningStage[] = [
     title: "Алғашқы сөздер",
     subtitle: "FIRST WORDS",
     description: "Күнделікті өмірде қолданылатын сөздерді үйреніңіз.",
-    href: "#first-words",
+    href: "/practice#first-words",
   },
   {
     id: 5,
@@ -55,7 +55,7 @@ const stageDefinitions: LearningStage[] = [
     title: "Қарапайым сөйлемдер",
     subtitle: "SIMPLE SENTENCES",
     description: "Алғашқы қытайша сөйлемдеріңізді құрастырыңыз.",
-    href: "#simple-sentences",
+    href: "/practice#simple-sentences",
   },
 ];
 
@@ -106,19 +106,19 @@ export default function LearningPath() {
   return (
     <section className="mx-auto max-w-5xl px-6 py-16">
       <div className="mb-10">
-        <p className="text-xs uppercase tracking-[0.25em] text-[#B85F3D]">
+        <p className="text-xs uppercase tracking-[0.25em] text-terracotta">
           YOUR LEARNING JOURNEY
         </p>
 
-        <h2 className="mt-3 text-3xl font-bold text-[#242321]">
+        <h2 className="mt-3 text-3xl font-bold text-charcoal">
           Оқу жолы
         </h2>
 
-        <p className="mt-2 text-sm text-[#242321]/60">
+        <p className="mt-2 text-sm text-charcoal/60">
           Әр кезең жаңа білімге бастайды.
         </p>
 
-        <p className="mt-4 text-sm text-[#242321]/60">
+        <p className="mt-4 text-sm text-charcoal/60">
           {completedCount} / {stageDefinitions.length} курс аяқталды
         </p>
       </div>
@@ -136,35 +136,35 @@ export default function LearningPath() {
             aria-disabled={stage.status === "locked"}
             className={`relative flex gap-5 rounded-2xl border p-5 transition sm:p-6 ${
               stage.status === "locked"
-                ? "cursor-not-allowed border-[#242321]/10 bg-[#242321]/[0.02]"
-                : "cursor-pointer border-[#B85F3D]/30 bg-[#F3EDE1] hover:border-[#B85F3D] hover:shadow-sm"
+                ? "cursor-not-allowed border-charcoal/10 bg-charcoal/[0.02]"
+                : "cursor-pointer border-terracotta/30 bg-cream hover:border-terracotta hover:shadow-sm"
             }`}
           >
             <div className="flex flex-col items-center">
               <div
                 className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-sm font-bold ${
                   stage.status === "locked"
-                    ? "border-[#242321]/20 text-[#242321]/30"
+                    ? "border-charcoal/20 text-charcoal/30"
                     : stage.status === "completed"
-                      ? "border-[#B85F3D] bg-[#B85F3D] text-white"
-                      : "border-[#B85F3D] text-[#B85F3D]"
+                      ? "border-terracotta bg-terracotta text-white"
+                      : "border-terracotta text-terracotta"
                 }`}
               >
                 {stage.status === "completed" ? "✓" : stage.id}
               </div>
 
               {index !== stages.length - 1 && (
-                <div className="mt-2 h-full min-h-8 w-px bg-[#242321]/15" />
+                <div className="mt-2 h-full min-h-8 w-px bg-charcoal/15" />
               )}
             </div>
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-[10px] tracking-[0.2em] text-[#B85F3D]">
+                <p className="text-[10px] tracking-[0.2em] text-terracotta">
                   {stage.subtitle}
                 </p>
 
-                <span className="text-xs text-[#242321]/50">
+                <span className="text-xs text-charcoal/50">
                   {stage.status === "completed"
                     ? "Аяқталды ✓"
                     : stage.status === "available"
@@ -176,14 +176,14 @@ export default function LearningPath() {
               <h3
                 className={`mt-2 text-lg font-semibold ${
                   stage.status === "locked"
-                    ? "text-[#242321]/40"
-                    : "text-[#242321]"
+                    ? "text-charcoal/40"
+                    : "text-charcoal"
                 }`}
               >
                 {stage.title}
               </h3>
 
-              <p className="mt-2 text-sm leading-6 text-[#242321]/60">
+              <p className="mt-2 text-sm leading-6 text-charcoal/60">
                 {stage.description}
               </p>
             </div>

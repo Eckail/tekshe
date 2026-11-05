@@ -107,3 +107,41 @@ XP remains client-side and can be edited by the learner through browser storage.
 3. Expand HSK 1 beyond this 29-word starter only after checking the selected syllabus and translations; keep each new standard version isolated.
 4. Add browser-level keyboard, phone-layout, and speech playback checks. The current quality pass covers static checks, data validation, and a production build, not visual cross-device QA.
 5. Add HSK character-writing and recognition records, grammar points, and review scheduling without changing the versioned level IDs already stored.
+
+## Product UI redesign and mobile beta
+
+**Implemented:** 2026-11-05 on `feature/learning-system`.
+
+### Routes and interface
+
+- Added route-based pages for the dashboard (`/`), learning center, Pinyin module and lessons, HSK academy, HSK level and lesson pages, practice, progress, Tek Coin wallet, and profile.
+- Added a shared responsive app shell with a desktop sidebar, mobile bottom navigation, safe-area padding, route-aware active states, and a last-learning-route preference stored locally.
+- Added reusable page headings, icons, course catalogs, module summaries, and dashboard panels. Existing lesson data and `CurriculumCourseRunner` remain the execution path.
+- Centralized the Cream, Charcoal, Burnt Orange, Steppe Green, Sand, and Paper palette plus typography, spacing, focus, and reduced-motion styles in `app/globals.css`.
+
+### XP and Tek Coin
+
+- Kept XP and Tek Coin as separate ledgers. XP migration and level progression are unchanged; old XP is not converted into currency.
+- Added the versioned `tekshe-wallet:v1` transaction ledger with stable source activity IDs, idempotent lesson/milestone/quest/achievement awards, balance summaries, and preservation of unknown or invalid wallet schemas.
+- Added a wallet route showing balance, earned total, recent transaction history, reward rules, and a clearly marked future store. No purchase or spend flow is enabled.
+- Daily quest XP awards remain in the XP ledger and can award a separate, one-time 15 Tek Coin transaction. Lesson and course milestone rewards are likewise separate from their existing XP awards.
+- Local progress and wallet data remain device-specific browser storage and are not synchronized to an account.
+
+### PWA and verification
+
+- Added a web manifest, SVG app icon, mobile viewport/theme metadata, offline fallback page, and a production-only service worker. The worker uses network-first navigation and caches only the fallback page.
+- Verified `npm run lint`, `npx tsc --noEmit --incremental false`, the Next.js production build, and 14 XP/curriculum/wallet tests. The build generated all route entries successfully.
+- Local HTTP smoke checks returned 200 for the dashboard, module, lesson, practice, progress, wallet, profile, manifest, service worker, offline page, and icon. Unknown Pinyin and HSK routes returned 404.
+- Restored the existing five-stage Learning Path on `/learn`, retargeted its stages to working module/lesson routes, and kept the legacy `pinyin-basics` course completion/XP event when the five-lesson Pinyin curriculum is completed.
+- `node-ts-extension-hooks.mjs` is used only by the standalone Node test command so existing Next.js-style extensionless TypeScript imports can load under Node's type-stripping test runner.
+- Responsive behavior was reviewed in code, but no browser automation tool is available in this environment; physical-device and 360–1440 px visual QA remain unverified. PWA installation and offline behavior also still need device testing.
+- A public, logged-out beta URL is not yet verified. Vercel preview protection must be checked before sharing a deployment URL.
+- Vercel's project list returned the `tekshe` project, but project details and deployment settings returned 403 for the `eckail` scope. The earlier audit noted authenticated Preview pages; that setting was not revalidated in this pass. A new one-time owner access link was issued, and Preview details remain pending approval.
+
+### Remaining limitations
+
+1. Kazakh learning copy still needs review by a native editor.
+2. Pinyin playback uses device-provided speech synthesis; voice availability and pronunciation are not guaranteed.
+3. The streak reward amount is reserved in configuration but streak tracking and payouts are not implemented.
+4. Wallet persistence, learning progress, and the remembered learning route are local to the current browser/device.
+5. Complete mobile viewport, assistive-technology, installability, and offline acceptance testing before describing the beta as device-verified.

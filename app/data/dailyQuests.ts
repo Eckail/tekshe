@@ -1,12 +1,17 @@
 
 import { getLearningRecords } from "./progress";
 import { awardXP, getXPForSource, hasXPAward } from "./xp";
+import {
+  awardTekCoins,
+  hasTekCoinTransaction,
+  TEK_COIN_REWARDS,
+} from "./tekCoins";
 
 export type DailyQuest = {
   id: string;
   title: string;
   description: string;
-  reward: number;
+  xpReward: number;
   progress: number;
   target: number;
   completed: boolean;
@@ -64,37 +69,40 @@ export function getDailyQuests(): DailyQuest[] {
       id: "complete-exercise",
       title: "Алғашқы жаттығу",
       description: "Бір жаттығуды толық аяқтаңыз.",
-      reward: 20,
+      xpReward: 20,
       progress: Math.min(records.length, 1),
       target: 1,
       completed: hasExercise,
       claimed:
         claimedIds.includes("complete-exercise") ||
-        hasXPAward(`daily-quest:${today}:complete-exercise`),
+        hasXPAward(`daily-quest:${today}:complete-exercise`) ||
+        hasTekCoinTransaction(`quest:${today}:complete-exercise`),
     },
     {
       id: "score-30",
       title: "Дәлдік шебері",
       description: "Бір жаттығуда кемінде 30 дұрыс жауап беріңіз.",
-      reward: 30,
+      xpReward: 30,
       progress: Math.min(bestScore, 30),
       target: 30,
       completed: bestScore >= 30,
       claimed:
         claimedIds.includes("score-30") ||
-        hasXPAward(`daily-quest:${today}:score-30`),
+        hasXPAward(`daily-quest:${today}:score-30`) ||
+        hasTekCoinTransaction(`quest:${today}:score-30`),
     },
     {
       id: "listening-exercise",
       title: "Мұқият тыңдаушы",
       description: "Бір тыңдау жаттығуын аяқтаңыз.",
-      reward: 30,
+      xpReward: 30,
       progress: hasListening ? 1 : 0,
       target: 1,
       completed: hasListening,
       claimed:
         claimedIds.includes("listening-exercise") ||
-        hasXPAward(`daily-quest:${today}:listening-exercise`),
+        hasXPAward(`daily-quest:${today}:listening-exercise`) ||
+        hasTekCoinTransaction(`quest:${today}:listening-exercise`),
     },
   ];
 }
@@ -112,8 +120,15 @@ export function claimDailyQuest(id: string): boolean {
   if (typeof window === "undefined") return false;
 
   const awardId = `daily-quest:${today}:${id}`;
-  const awarded = awardXP(awardId, "daily-quest", quest.reward);
+  const awarded = awardXP(awardId, "daily-quest", quest.xpReward);
   if (!awarded && !hasXPAward(awardId)) return false;
+
+  const coinAwarded = awardTekCoins({
+    sourceActivityId: `quest:${today}:${id}`,
+    source: "quest",
+    amount: TEK_COIN_REWARDS.dailyQuest,
+    description: `Күнделікті тапсырма: ${quest.title}`,
+  });
 
   try {
     const saved: unknown = JSON.parse(
@@ -131,7 +146,7 @@ export function claimDailyQuest(id: string): boolean {
     // The XP event is authoritative; getDailyQuests also checks it directly.
   }
 
-  return awarded;
+  return awarded || coinAwarded;
 }
 
 export function getTotalBonusXP(): number {

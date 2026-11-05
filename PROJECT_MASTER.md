@@ -83,7 +83,7 @@ Run commands from C:\Users\lenovo\tekshe:
 - npm run dev — start local development at http://localhost:3000.
 - npm run lint — ESLint.
 - npx --no-install tsc --noEmit --incremental false — TypeScript check without writing incremental state.
-- node --experimental-strip-types --test app\data\xp.test.mjs app\data\curriculum.test.mjs app\data\curriculumProgress.test.mjs — XP and curriculum tests.
+- node --import app\data\node-ts-extension-hooks.mjs --experimental-strip-types --test app\data\xp.test.mjs app\data\curriculum.test.mjs app\data\curriculumProgress.test.mjs app\data\tekCoins.test.mjs — XP, curriculum, and wallet tests.
 - npm run build — Next.js production build.
 
 The course integrity tests check IDs, sources, vocabulary, pinyin characters, tone counts, examples, exercise answers, and version metadata. Completion tests check prerequisites, repeated submission, and one-time rewards.
@@ -98,3 +98,32 @@ The course integrity tests check IDs, sources, vocabulary, pinyin characters, to
 6. Progress remains device-local and client-side; accounts, sync, and server-validated XP are later platform work.
 
 Recommended next stage: get native Kazakh review for the current material, then expand HSK 1 by source-verified themes and add a small set of character-recognition records using the existing extension fields.
+
+## 2026-11-05 — Product UI redesign and mobile beta foundation
+
+### Application architecture
+
+- Tekshe now has route-based Dashboard, Learning Center, Pinyin module/lesson, HSK academy/level/lesson, Practice, Progress, Tek Coin Wallet, and Profile pages.
+- A shared `AppShell` provides desktop sidebar navigation and mobile bottom navigation, safe-area spacing, route-aware state, and a versioned last-learning-route preference.
+- Module and lesson views continue using the existing curriculum data and `CurriculumCourseRunner`; the redesign does not replace the curriculum or XP engine. The five-stage legacy learning path remains available at `/learn`, and Pinyin completion still records the legacy course ID and XP event.
+- `app/globals.css` defines the core Cream, Charcoal, Burnt Orange palette and Steppe Green, Sand, and Paper support tokens, plus type/spacing scales, visible focus, and reduced-motion rules.
+
+### Separate XP and Tek Coin ledgers
+
+- XP remains the internal progression measure in its existing ledger. Existing XP migration is preserved and no XP is converted into Tek Coins.
+- `app/data/tekCoins.ts` stores wallet transactions under `tekshe-wallet:v1`, with idempotent activity IDs for lesson, daily quest, milestone, and achievement rewards. Unknown or invalid schemas are preserved instead of overwritten.
+- The wallet page shows balance, total earned, transaction history, and earning rules. It has no purchase or spend flow; the future store is labeled as upcoming.
+- Browser storage is device-local. Progress and wallet records do not sync across devices or accounts.
+
+### PWA and verification
+
+- Added an app manifest, SVG icon, mobile theme/viewport metadata, an offline page, and a production-only network-first service worker that caches only the offline fallback.
+- `npm run lint`, `npx tsc --noEmit --incremental false`, and the production build passed. XP, curriculum, progress, and wallet suites passed 14 tests.
+- Local HTTP smoke checks returned 200 for all primary routes and PWA assets; unknown Pinyin and HSK routes returned 404. Build output includes all application routes. Browser-based viewport, keyboard, assistive-technology, PWA-installation, and offline tests were not available in this environment and remain unverified.
+
+### Known limitations and next work
+
+- Obtain native Kazakh editorial review and use reviewed Mandarin recordings instead of relying solely on device speech synthesis.
+- Implement streak tracking before paying the configured streak reward.
+- Verify Vercel Preview access and test a logged-out beta URL before sharing it as a public mobile beta.
+- Perform visual acceptance checks at 360, 375, 390, 430, 768, 1024, and 1440 px and test localStorage persistence on a real phone.

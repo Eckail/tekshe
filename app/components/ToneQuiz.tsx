@@ -127,40 +127,40 @@ export default function ToneQuiz() {
   if (isFinished) {
     return (
       <section className="mx-auto max-w-3xl px-6 py-20 text-center">
-        <p className="text-sm text-[#242321]/60">
+        <p className="text-sm text-charcoal/60">
           {mode === "visual"
             ? "Көру арқылы жаттығу"
             : "Тыңдау арқылы жаттығу"}
         </p>
 
-        <h2 className="mt-4 text-3xl font-bold text-[#242321]">
+        <h2 className="mt-4 text-3xl font-bold text-charcoal">
           Жаттығу аяқталды!
         </h2>
 
-        <p className="mt-4 text-lg text-[#242321]/70">
+        <p className="mt-4 text-lg text-charcoal/70">
           Сіздің нәтижеңіз:
         </p>
 
-        <p className="mt-2 text-5xl font-bold text-[#B85F3D]">
+        <p className="mt-2 text-5xl font-bold text-terracotta">
           {score} / {toneQuestions.length}
         </p>
 
-        <div className="mx-auto mt-8 max-w-sm rounded-3xl border border-[#242321]/10 bg-white/50 p-8">
-          <p className="text-sm uppercase tracking-widest text-[#242321]/50">
+        <div className="mx-auto mt-8 max-w-sm rounded-3xl border border-charcoal/10 bg-white/50 p-8">
+          <p className="text-sm uppercase tracking-widest text-charcoal/50">
             Жиналған тәжірибе
           </p>
 
-          <p className="mt-3 text-5xl font-bold text-[#B85F3D]">
+          <p className="mt-3 text-5xl font-bold text-terracotta">
             +{xp} XP
           </p>
 
-          <p className="mt-3 text-sm text-[#242321]/60">
+          <p className="mt-3 text-sm text-charcoal/60">
             Әр дұрыс жауап үшін 10 XP және
             жаттығуды аяқтағаныңыз үшін 20 XP.
           </p>
 
           {courseXPRewarded && (
-            <p className="mt-3 text-sm font-medium text-[#B85F3D]">
+            <p className="mt-3 text-sm font-medium text-terracotta">
               +{COURSE_COMPLETION_XP} XP — курсты аяқтағаныңыз үшін
             </p>
           )}
@@ -168,7 +168,7 @@ export default function ToneQuiz() {
 
         <button
           onClick={handleRestart}
-          className="mt-8 rounded-full bg-[#242321] px-8 py-3 text-white transition hover:bg-[#B85F3D]"
+          className="mt-8 rounded-full bg-charcoal px-8 py-3 text-white transition hover:bg-terracotta"
         >
           Қайта бастау
         </button>
@@ -179,11 +179,11 @@ export default function ToneQuiz() {
   return (
     <section className="mx-auto max-w-3xl px-6 py-20">
       <div className="text-center">
-        <p className="text-sm uppercase tracking-widest text-[#B85F3D]">
+        <p className="text-sm uppercase tracking-widest text-terracotta">
           Pinyin & Tones
         </p>
 
-        <h2 className="mt-3 text-3xl font-semibold text-[#242321]">
+        <h2 className="mt-3 text-3xl font-semibold text-charcoal">
           Тондарды үйрену
         </h2>
 
@@ -192,8 +192,8 @@ export default function ToneQuiz() {
             onClick={() => changeMode("visual")}
             className={`rounded-full px-5 py-3 text-sm transition ${
               mode === "visual"
-                ? "bg-[#242321] text-white"
-                : "border border-[#242321]/20 text-[#242321]"
+                ? "bg-charcoal text-white"
+                : "border border-charcoal/20 text-charcoal"
             }`}
           >
             Көру арқылы
@@ -203,8 +203,8 @@ export default function ToneQuiz() {
             onClick={() => changeMode("listening")}
             className={`rounded-full px-5 py-3 text-sm transition ${
               mode === "listening"
-                ? "bg-[#B85F3D] text-white"
-                : "border border-[#242321]/20 text-[#242321]"
+                ? "bg-terracotta text-white"
+                : "border border-charcoal/20 text-charcoal"
             }`}
           >
             Тыңдау арқылы
@@ -213,20 +213,20 @@ export default function ToneQuiz() {
       </div>
 
       <div className="mt-12 flex items-center justify-between">
-        <p className="text-sm text-[#242321]/60">
+        <p className="text-sm text-charcoal/60">
           {mode === "visual"
             ? "Тондарды ажырату"
             : "Тыңдап, тонды анықта"}
         </p>
 
-        <p className="text-sm font-medium text-[#242321]">
+        <p className="text-sm font-medium text-charcoal">
           {currentIndex + 1} / {toneQuestions.length}
         </p>
       </div>
 
-      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-[#242321]/10">
+      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-charcoal/10">
         <div
-          className="h-full bg-[#B85F3D] transition-all"
+          className="h-full bg-terracotta transition-all"
           style={{
             width: `${((currentIndex + 1) / toneQuestions.length) * 100}%`,
           }}
@@ -236,30 +236,30 @@ export default function ToneQuiz() {
       <div className="py-16 text-center">
         {mode === "visual" ? (
           <>
-            <p className="text-sm text-[#242321]/60">
+            <p className="text-sm text-charcoal/60">
               Бұл буында қай тон қолданылған?
             </p>
 
-            <h3 className="mt-6 text-8xl font-semibold text-[#242321]">
+            <h3 className="mt-6 text-8xl font-semibold text-charcoal">
               {currentQuestion.pinyin}
             </h3>
 
-            <p className="mt-3 text-3xl text-[#242321]/70">
+            <p className="mt-3 text-3xl text-charcoal/70">
               {currentQuestion.hanzi}
             </p>
           </>
         ) : (
           <>
-            <p className="text-sm text-[#242321]/60">
+            <p className="text-sm text-charcoal/60">
               Дыбысты тыңдаңыз. Қай тон екенін анықтаңыз.
             </p>
 
             <div className="mt-8 flex flex-col items-center">
-              <div className="flex h-36 w-36 items-center justify-center rounded-full border border-[#B85F3D]/30 bg-[#B85F3D]/5">
-                <span className="text-5xl text-[#B85F3D]">♫</span>
+              <div className="flex h-36 w-36 items-center justify-center rounded-full border border-terracotta/30 bg-terracotta/5">
+                <span className="text-5xl text-terracotta">♫</span>
               </div>
 
-              <p className="mt-5 text-sm text-[#242321]/50">
+              <p className="mt-5 text-sm text-charcoal/50">
                 Дыбысты бірнеше рет тыңдауға болады
               </p>
             </div>
@@ -268,7 +268,7 @@ export default function ToneQuiz() {
 
         <button
           onClick={playPronunciation}
-          className="mt-8 rounded-full bg-[#B85F3D] px-8 py-4 text-white transition hover:bg-[#242321]"
+          className="mt-8 rounded-full bg-terracotta px-8 py-4 text-white transition hover:bg-charcoal"
         >
           ▶ Тыңдау
         </button>
@@ -279,7 +279,7 @@ export default function ToneQuiz() {
             const isCorrect = currentQuestion.correctAnswer === tone;
 
             let buttonStyle =
-              "border-[#242321]/20 text-[#242321] hover:border-[#B85F3D]";
+              "border-charcoal/20 text-charcoal hover:border-terracotta";
 
             if (answered && isCorrect) {
               buttonStyle = "border-green-600 bg-green-600 text-white";
@@ -314,19 +314,19 @@ export default function ToneQuiz() {
                 : `Қате. Дұрыс жауап: ${currentQuestion.correctAnswer}-тон.`}
             </p>
 
-            <div className="mt-4 rounded-2xl bg-[#242321]/5 p-5">
-              <p className="text-2xl font-semibold text-[#242321]">
+            <div className="mt-4 rounded-2xl bg-charcoal/5 p-5">
+              <p className="text-2xl font-semibold text-charcoal">
                 {currentQuestion.pinyin}
               </p>
 
-              <p className="mt-1 text-xl text-[#242321]/70">
+              <p className="mt-1 text-xl text-charcoal/70">
                 {currentQuestion.hanzi}
               </p>
             </div>
 
             <button
               onClick={handleNext}
-              className="mt-6 rounded-full bg-[#242321] px-8 py-3 text-white transition hover:bg-[#B85F3D]"
+              className="mt-6 rounded-full bg-charcoal px-8 py-3 text-white transition hover:bg-terracotta"
             >
               {currentIndex === toneQuestions.length - 1
                 ? "Нәтижені көру"
