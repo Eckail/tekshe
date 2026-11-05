@@ -1,9 +1,10 @@
 /**
- * Versioned curriculum contracts. Level IDs belong to a curriculum version,
- * so a later HSK standard can add, rename, or regroup levels without changing
- * the application model.
+ * Versioned curriculum contracts shared by pronunciation and HSK courses.
+ * Level IDs belong to a curriculum version; no fixed number of levels is
+ * assumed by the application.
  */
 export type CurriculumModuleKind =
+  | "phonetics"
   | "vocabulary-characters"
   | "grammar"
   | "reading"
@@ -35,6 +36,20 @@ export type CopyrightStatus =
 
 export type MandarinTone = 1 | 2 | 3 | 4 | "neutral";
 
+export type WordPartOfSpeech =
+  | "noun"
+  | "verb"
+  | "adjective"
+  | "pronoun"
+  | "adverb"
+  | "particle"
+  | "numeral"
+  | "classifier"
+  | "preposition"
+  | "conjunction"
+  | "phrase"
+  | "interjection";
+
 export type CurriculumStandard = {
   id: string;
   name: string;
@@ -42,6 +57,17 @@ export type CurriculumStandard = {
   publishedAt?: string;
   effectiveFrom?: string;
   sourceUrl?: string;
+  publisher?: string;
+};
+
+export type CurriculumSource = {
+  id: string;
+  title: string;
+  publisher: string;
+  url: string;
+  publishedAt?: string;
+  consultedAt: string;
+  locator?: string;
 };
 
 export type CurriculumLevel = {
@@ -75,18 +101,42 @@ export type VocabularyExample = {
   translationKazakh: string;
 };
 
+export type TeachingSection = {
+  id: string;
+  title: string;
+  explanationKazakh: string;
+  items?: string[];
+  examples?: VocabularyExample[];
+};
+
+export type CharacterLearningMetadata = {
+  character: string;
+  strokeCount?: number;
+  radical?: string;
+  structure?: string;
+  strokeOrderAssetId?: string;
+  commonErrorsKazakh?: string[];
+};
+
 export type VocabularyEntry = {
   id: string;
   curriculumId: string;
   levelId: string;
   hanzi: string;
   pinyin: string;
-  tone: MandarinTone;
+  /** Lexical tone for each written syllable; sandhi is kept in pronunciation notes. */
+  tones: MandarinTone[];
   translationKazakh: string;
-  partOfSpeech: string;
+  translationReview: "editorial-draft" | "native-reviewed";
+  partOfSpeech: WordPartOfSpeech;
   example: VocabularyExample;
+  sourceId: string;
   audioAssetId?: string;
   difficulty: number;
+  characterDetails?: CharacterLearningMetadata[];
+  collocations?: string[];
+  grammarPointIds?: string[];
+  commonErrorsKazakh?: string[];
 };
 
 export type GrammarPoint = {
@@ -138,6 +188,9 @@ export type CurriculumExercise = {
   prompt: string;
   answer: string | string[];
   explanationKazakh: string;
+  options?: string[];
+  /** Mandarin text read aloud by the browser for listening-selection items. */
+  audioText?: string;
   audioAssetId?: string;
   readingMaterialId?: string;
 };
@@ -149,7 +202,9 @@ export type CurriculumLesson = {
   unitId: string;
   moduleId: string;
   title: string;
+  introductionKazakh?: string;
   learningObjectives: string[];
+  teachingSections?: TeachingSection[];
   vocabularyIds: string[];
   grammarPointIds: string[];
   readingMaterialIds: string[];
@@ -158,11 +213,14 @@ export type CurriculumLesson = {
   prerequisites: string[];
 };
 
-export type HskCurriculum = {
+export type Curriculum = {
   id: string;
   title: string;
+  descriptionKazakh?: string;
+  editorialNoteKazakh?: string;
   standard: CurriculumStandard;
   version: string;
+  sources: CurriculumSource[];
   levels: CurriculumLevel[];
   modules: CurriculumModule[];
   units: CurriculumUnit[];
@@ -173,3 +231,6 @@ export type HskCurriculum = {
   audioAssets: AudioAsset[];
   exercises: CurriculumExercise[];
 };
+
+/** Backward-compatible name for callers that refer specifically to HSK data. */
+export type HskCurriculum = Curriculum;

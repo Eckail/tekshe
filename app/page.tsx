@@ -3,19 +3,17 @@ import Hero from "./components/Hero";
 import Courses from "./components/Courses";
 import About from "./components/About";
 import Footer from "./components/Footer";
-import PinyinList from "./components/PinyinList";
-import ToneQuiz from "./components/ToneQuiz";
 import PlayerProgress from "./components/PlayerProgress";
 import DailyQuests from "./components/DailyQuests";
 import Achievements from "./components/Achievements";
 import LearningPath from "./components/LearningPath";
-import CourseCompletionButton from "./components/CourseCompletionButton";
-import SyllableLesson from "./components/SyllableLesson";
-import SyllableQuiz from "./components/SyllableQuiz";
 import FirstWords from "./components/FirstWords";
 import FirstWordsQuiz from "./components/FirstWordsQuiz";
 import SimpleSentences from "./components/SimpleSentences";
 import SentenceQuiz from "./components/SentenceQuiz";
+import CurriculumCourseRunner from "./components/CurriculumCourseRunner";
+import { hsk1FoundationCurriculum } from "./data/hsk1Foundation";
+import { pinyinCurriculum } from "./data/pinyinCurriculum";
 
 export default function Home() {
   return (
@@ -47,21 +45,16 @@ export default function Home() {
 
       <Courses />
 
-<div id="pinyin-basics">
-  <PinyinList />
+      <CurriculumCourseRunner
+        curriculum={pinyinCurriculum}
+        sectionId="pinyin-basics"
+        legacyCourseId="pinyin-basics"
+      />
 
-  <div className="mx-auto max-w-5xl px-6 pb-12">
-    <CourseCompletionButton courseId="pinyin-basics" />
-  </div>
-</div>
-
-<div id="tone-practice">
-  <ToneQuiz />
-</div>
-
-      <SyllableLesson />
-
-      <SyllableQuiz />
+      <CurriculumCourseRunner
+        curriculum={hsk1FoundationCurriculum}
+        sectionId="hsk1-foundation"
+      />
 
       <FirstWords />  
 

@@ -3,16 +3,18 @@
 **Audit date:** 2026-11-05
 **Branch:** `feature/learning-system` tracking `origin/feature/learning-system`
 
+The initial findings below describe the repository before the Pinyin/HSK follow-up recorded at the end of this file.
+
 ## Repository state
 
 - The repository root is `C:\Users\lenovo\tekshe`; the application source is in `app/`.
 - The repository uses Next.js 16.4.3, React 19.3.0, TypeScript 5, Tailwind CSS 4, and the App Router. Cache Components and Partial Prefetching are enabled.
-- The root `AGENTS.md` is present. No `PROJECT_MASTER.md` was found; a `CHANGELOG.md` was added with the learning-core changes.
+- The root `AGENTS.md` is present. No `PROJECT_MASTER.md` existed at initial inspection; the Pinyin/HSK follow-up adds one at the repository root.
 - `app/page.tsx` assembles the product as one landing page. The app now uses Tekshe-specific page metadata and declares Kazakh (`lang="kk"`).
 - The delivery review found no unrelated local changes. Next.js added its managed agent-feedback block to `AGENTS.md` when the development server started; it is retained as instructed by Next.js.
 - `next.config.ts` has framework settings only. No app database, authentication, or Vercel project configuration is present in the repository.
 
-## Implemented learning features
+## Implemented learning features (initial baseline)
 
 | Area | Current implementation |
 | --- | --- |
@@ -49,7 +51,7 @@ XP remains client-side and can be edited by the learner through browser storage.
 - Keep curriculum records in versioned data files or a content service, rather than embedding new course data in components.
 - Preserve `CurriculumStandard` metadata and version-specific level IDs when adding HSK content.
 
-### Next implementation stage
+### Next implementation stage (pre-follow-up plan; completed below)
 
 1. Continue the Pinyin course: review and expand the sound inventory, add lesson objectives and completion criteria, and move the remaining quiz prompts into structured data.
 2. Create a curriculum registry and integrity checks for level, unit, lesson, vocabulary, and prerequisite IDs.
@@ -71,3 +73,37 @@ XP remains client-side and can be edited by the learner through browser storage.
 - Production build: passed with Next.js 16.4.3; `/` and `/_not-found` prerender successfully.
 - Local development server returned HTTP 200 for `/`; all rendered in-page anchor links resolved to existing section IDs. `/learn`, `/courses`, and `/xp` are not routes; the learning path, course content, and XP UI are sections on `/`.
 - Vercel is connected to GitHub. Production deployment metadata points to `main`; pushes to `feature/learning-system` create READY Preview deployments. Preview hosts redirect to Vercel sign-in.
+
+## Pinyin refinement and HSK 1 foundation follow-up
+
+**Completed:** 2026-11-05 on `feature/learning-system`.
+
+### Current implementation
+
+- `data/pinyinCurriculum.ts` defines a five-lesson, ordered Pinyin course: 21 initials; grouped simple, compound, nasal, special, and medial-combination finals; ü spelling; all five tones; third-tone sandhi; 一/不 tone changes; y/w, contracted finals, tone-mark placement, apostrophe use, and common sound contrasts.
+- Pinyin lessons include objectives, Kazakh explanations, examples, listening-selection exercises, syllable-building and reading exercises, and contrast practice. Audio selection uses browser speech synthesis with `zh-CN`; voice availability and quality depend on the learner's device.
+- `data/curriculum.ts` now defines a shared versioned curriculum model with source references, per-syllable tone arrays, lesson teaching sections, answer choices, character-study metadata, collocations, grammar references, and common-error fields.
+- `CurriculumCourseRunner.tsx` runs both the Pinyin and HSK starter courses. It renders lesson goals, explanations, examples, practice, answer feedback, prerequisites, completion, local progress, and the existing one-time course XP reward. The Pinyin course also writes the legacy `pinyin-basics` completion ID so the current learning path continues to work.
+- `data/hsk1Foundation.ts` adds 29 level-one words in three themed lessons. Each entry includes characters, pinyin, lexical tones, part of speech, Kazakh gloss, example sentence and translation, curriculum/level IDs, and an official syllabus source reference.
+- The selected content source is the Chinese Proficiency Test HSK syllabus published by the Center for Language Education and Cooperation in 2025-11 and effective 2026-07. The 2021 International Chinese Education Chinese Proficiency Standards and historical HSK 2.0 are recorded as separate references in the master project document; their word lists are not mixed into this dataset.
+- Kazakh explanations and glosses are marked as editorial drafts and need review by a native Kazakh editor before publication. This is a known content-review requirement, not an automated translation claim.
+- HSK levels remain data-defined strings and arrays. Future character strokes/radicals/structure, collocations, grammar links, and error notes have optional typed fields.
+- No standalone Lesson Engine or lesson routes existed beforehand. This is a small shared runner over the existing App Router page and contracts; no broader route or storage rewrite was made.
+
+### Quality checks
+
+- `npx --no-install tsc --noEmit --incremental false`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed; the home page and not-found page prerender.
+- `node --experimental-strip-types --test app/data/xp.test.mjs app/data/curriculum.test.mjs app/data/curriculumProgress.test.mjs`: 8 passed.
+- Curriculum tests verify the inventory, referenced IDs, required explanations/examples/translations, pinyin character validity, tone counts, source-version agreement, and the 29-entry starter set.
+- XP/progress tests verify incomplete-course gating, repeat submissions, invalid IDs, and one-time awards.
+- Progress storage preserves unknown lesson IDs so a future client version does not erase progress it cannot currently render.
+
+### Known gaps and next stage
+
+1. Get native Kazakh editorial review for every course explanation, gloss, and sentence translation before public release.
+2. Replace device-dependent speech synthesis with reviewed, licensed standard-Mandarin recordings when an audio workflow is chosen.
+3. Expand HSK 1 beyond this 29-word starter only after checking the selected syllabus and translations; keep each new standard version isolated.
+4. Add browser-level keyboard, phone-layout, and speech playback checks. The current quality pass covers static checks, data validation, and a production build, not visual cross-device QA.
+5. Add HSK character-writing and recognition records, grammar points, and review scheduling without changing the versioned level IDs already stored.
