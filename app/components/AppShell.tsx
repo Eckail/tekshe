@@ -24,12 +24,12 @@ function isActive(pathname: string, href: string) {
 function Brand() {
   return (
     <Link href="/" className="flex min-h-12 items-center gap-3 rounded-lg text-charcoal focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-terracotta" aria-label="Tekshe — басты бет">
-      <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-charcoal text-cream" aria-hidden="true">
-        <svg viewBox="0 0 32 32" className="h-7 w-7" fill="none">
-          <path d="M5 7h22M16 7v19M10 14h12" stroke="currentColor" strokeWidth="2" />
-          <path d="M7 24h7M18 24h7" stroke="currentColor" strokeWidth="2" />
-        </svg>
-      </span>
+      <svg viewBox="0 0 128 128" className="h-10 w-10 shrink-0" aria-hidden="true">
+        <path d="M14 43C17 25 29 17 48 15L108 15C103 29 91 35 74 39L17 49Z" fill="#B85F3D" />
+        <path d="M39 56C44 46 54 43 68 43H111C106 59 96 66 81 70L70 72C64 73 62 78 61 88C59 103 47 112 24 118L30 83C32 68 34 61 39 56Z" fill="#242321" />
+        <path d="M77 13C75 1 83 -8 96 -11C100 3 94 13 82 19Z" fill="#B85F3D" transform="translate(0 12)" />
+        <path d="M84 27C96 16 109 19 117 29C108 39 96 39 84 31Z" fill="#B85F3D" />
+      </svg>
       <span>
         <span className="block text-xl font-semibold tracking-tight">tekshe</span>
         <span className="block text-[10px] uppercase tracking-[0.18em] text-charcoal/55">中文学习</span>
