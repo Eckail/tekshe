@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import=./app/data/node-ts-extension-hooks.mjs --experimental-strip-types --test ./app/data/xp.test.mjs ./app/data/curriculum.test.mjs ./app/data/curriculumProgress.test.mjs ./app/data/tekCoins.test.mjs ./app/data/learnerProfile.test.mjs"
   },
   "dependencies": {
     "next": "16.4.3",
