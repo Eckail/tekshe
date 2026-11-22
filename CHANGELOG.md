@@ -91,3 +91,31 @@
 - Local HTTP checks returned 200 for the primary routes and PWA assets, with 404 for invalid routes. No browser automation is available in this environment, so actual phone viewport, logged-out Preview, PWA installability, and offline behavior remain unverified.
 - GitHub reports a successful Vercel status check for the feature push; deployment details and a logged-out Preview URL could not be verified because the Vercel team API returned 403.
 - No Production deployment was triggered.
+
+## 2026-11-22 — Startup MVP demo polish
+
+### Added
+
+- A redesigned Dashboard with a clear resume action, accurate saved-learning statistics, daily lesson goal, course progress, and direct Profile access.
+- Responsive navigation tuned for phone, tablet, and desktop widths.
+- An editable local learner profile with nickname, avatar, and daily lesson goal, stored in versioned browser localStorage without asking for identifying information.
+- Learner profile storage tests and `npm test` / `npm run typecheck` scripts.
+
+### Verification
+
+- Tests: 18 passed across XP, curriculum, lesson progress, Tek Coin, and local profile data.
+- TypeScript and ESLint: passed.
+- Production build: passed after the Next.js advisory retry.
+- Browser QA: Dashboard and Profile checked at 360–1440 px, keyboard focus checked, profile settings persisted after reload, Pinyin completion/reward flow exercised, and HSK 1 page loaded. No console errors, failed requests, or horizontal overflow were found in the checked routes.
+- Vercel Preview `https://tekshe-git-feature-startup-demo-mvp-eckail.vercel.app` reached READY for the development branch and returned HTTP 200 without login after a Preview-alias-only protection exception. Production deployment and `main` were untouched.
+
+### Commits
+
+- `feat(ui): polish startup demo dashboard and app shell`
+- `feat(profile): add editable local learner profile`
+
+### Limits and next steps
+
+- Profile and learning data remain local to the current browser; account and sync support are not included.
+- Next.js 16.4.3 reports a known security advisory. Review its security upgrade recommendation before production release.
+- Continue with native Kazakh review, judge-facing demo rehearsal, and a deliberate release review before merging to `main`.

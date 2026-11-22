@@ -12,7 +12,7 @@ The product keeps its Premium Bauhaus visual direction:
 
 ## Current product state
 
-The repository is a Next.js App Router project. The home route at / currently composes the landing page, learning path, Pinyin, HSK starter course, first-word and sentence practice, progress, quests, achievements, and supporting sections. Course material is shown on the home route; there are no separate /learn, /courses, or /xp routes.
+The repository is a Next.js App Router project with route-based Dashboard (/), Learning Center (/learn), Pinyin, HSK 1, Practice, Progress, Wallet, and Profile pages. Lesson screens use shared curriculum/course components. The older five-stage learning path remains accessible from /learn.
 
 Current foundation:
 
@@ -82,8 +82,8 @@ Run commands from C:\Users\lenovo\tekshe:
 
 - npm run dev — start local development at http://localhost:3000.
 - npm run lint — ESLint.
-- npx --no-install tsc --noEmit --incremental false — TypeScript check without writing incremental state.
-- node --import app\data\node-ts-extension-hooks.mjs --experimental-strip-types --test app\data\xp.test.mjs app\data\curriculum.test.mjs app\data\curriculumProgress.test.mjs app\data\tekCoins.test.mjs — XP, curriculum, and wallet tests.
+- npm run typecheck -- --incremental false — TypeScript check without writing incremental state.
+- npm test — XP, curriculum, lesson progress, wallet, and learner profile tests.
 - npm run build — Next.js production build.
 
 The course integrity tests check IDs, sources, vocabulary, pinyin characters, tone counts, examples, exercise answers, and version metadata. Completion tests check prerequisites, repeated submission, and one-time rewards.
@@ -127,3 +127,29 @@ Recommended next stage: get native Kazakh review for the current material, then 
 - Implement streak tracking before paying the configured streak reward.
 - GitHub reported a successful Vercel check for the pushed feature branch; deployment detail access is 403, so the Preview hostname and logged-out access remain unverified. Verify access and test before sharing a public mobile beta.
 - Perform visual acceptance checks at 360, 375, 390, 430, 768, 1024, and 1440 px and test localStorage persistence on a real phone.
+
+## 2026-11-22 — Startup MVP demo beta
+
+### Dashboard and profile
+
+- The Dashboard now presents a clear next lesson, real saved learning totals, a configurable daily lesson goal, daily quests, and direct access to the local learner profile.
+- The shared AppShell uses a desktop sidebar from large breakpoints and a five-item mobile navigation that includes Learning, Practice, Progress, and Profile.
+- Profile settings include a nickname, illustrated avatar choice, and a daily goal of one, two, or three lessons. Data is versioned under `tekshe-learner-profile:v1` in this browser only; there is no account or cloud synchronization.
+- Dashboard and Profile use the existing curriculum, progress, XP, and Tek Coin records. The learning and reward engines were not replaced.
+
+### Current verification
+
+- `npm test`: 18 tests passed, including XP, curriculum, lesson progress, Tek Coin, and learner profile storage.
+- `npm run typecheck -- --incremental false`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed after retrying once as instructed by Next.js. Next.js 16.4.3 reports a known security advisory; see the development workflow note below.
+- Browser checks covered Dashboard and Profile at 360, 390, 430, 768, 1024, and 1440 px with no horizontal overflow. Keyboard focus, profile save/reload, Pinyin lesson completion, the HSK 1 lesson route, primary routes, and console/network errors were checked.
+- The Vercel Preview for `feature/startup-demo-mvp` reached READY at `https://tekshe-git-feature-startup-demo-mvp-eckail.vercel.app`. An unauthenticated HTTP HEAD request returned 200. A protection exception was scoped to this Preview alias; project-level SSO settings were left unchanged.
+- No merge to `main` and no Production Deployment were performed.
+
+### Current workflow and limits
+
+- Develop on `feature/startup-demo-mvp`; push to `origin/feature/startup-demo-mvp` to create a Vercel Preview. Keep `main` for a separately reviewed release decision.
+- Current checks are `npm run dev`, `npm run lint`, `npm run typecheck -- --incremental false`, `npm test`, and `npm run build`.
+- Learner profile and learning progress are still browser-local and can be lost if site data is cleared. Native Kazakh editorial review and reviewed Mandarin recordings remain open curriculum tasks.
+- Next.js 16.4.3 stopped the first dev/build attempt to display a security-upgrade recommendation and continued after retry. Review the recommended `next upgrade --agent=security` separately before release.
