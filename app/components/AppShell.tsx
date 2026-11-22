@@ -84,7 +84,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen overflow-x-clip bg-cream text-charcoal">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-charcoal/10 bg-cream px-5 py-6 md:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-charcoal/10 bg-cream px-5 py-6 lg:flex">
         <Brand />
         <p className="mb-3 mt-10 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-charcoal/45">ОҚУ АЙМАҒЫ</p>
         <nav aria-label="Негізгі навигация" className="grid gap-1">
@@ -98,16 +98,16 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <div className="min-h-screen md:pl-64">
-        <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between border-b border-charcoal/10 bg-cream/95 px-4 backdrop-blur-sm sm:px-6 md:hidden">
+      <div className="min-h-screen lg:pl-64">
+        <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between border-b border-charcoal/10 bg-cream/95 px-4 backdrop-blur-sm sm:px-6 lg:hidden">
           <Brand />
           <WalletBalanceLink compact />
         </header>
-        <main className="mx-auto min-h-[calc(100vh-4rem)] w-full max-w-[1500px] px-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 md:min-h-screen md:px-10 md:pb-12 md:pt-10 lg:px-14">
+        <main className="mx-auto min-h-[calc(100vh-4rem)] w-full max-w-[1440px] px-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 lg:min-h-screen lg:px-10 lg:pb-12 lg:pt-10 xl:px-14">
           {children}
         </main>
-        <nav aria-label="Мобильді навигация" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-charcoal/10 bg-paper/95 px-1 pb-[env(safe-area-inset-bottom)] pt-1 shadow-[0_-6px_24px_rgba(36,35,33,0.06)] backdrop-blur-sm md:hidden">
-          {[navItems[0], navItems[1], navItems[2], navItems[4], navItems[5]].map((item) => (
+        <nav aria-label="Мобильді навигация" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-charcoal/10 bg-paper/95 px-1 pb-[env(safe-area-inset-bottom)] pt-1 shadow-[0_-6px_24px_rgba(36,35,33,0.06)] backdrop-blur-sm lg:hidden">
+          {[navItems[0], navItems[1], navItems[2], navItems[3], navItems[5]].map((item) => (
             <NavLink key={item.href} {...item} active={isActive(pathname, item.href)} mobile />
           ))}
         </nav>

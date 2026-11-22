@@ -6,6 +6,7 @@ import { createProgressStore } from "./progressStore";
 import { getTotalXP } from "./xp";
 import { getWalletSnapshot } from "./tekCoins";
 import { getXPLevel } from "./xpLevels";
+import { DEFAULT_LEARNER_PROFILE, readLearnerProfile, type LearnerProfile } from "./learnerProfile";
 
 export type LearningSummary = {
   coinBalance: number;
@@ -21,6 +22,12 @@ export type LearningSummary = {
   continueTitle: string;
   lastModuleLabel: string;
   availableLevel: string;
+  learnerProfile: LearnerProfile;
+  dailyGoalLessons: LearnerProfile["dailyGoalLessons"];
+  completedLessons: number;
+  totalLessons: number;
+  completedCourses: number;
+  totalCourses: number;
 };
 
 const emptySummary: LearningSummary = {
@@ -37,6 +44,12 @@ const emptySummary: LearningSummary = {
   continueTitle: "声母: буынның бастапқы дыбыстары",
   lastModuleLabel: "Пиньинь",
   availableLevel: "HSK 1 бастау курсы қолжетімді",
+  learnerProfile: DEFAULT_LEARNER_PROFILE,
+  dailyGoalLessons: DEFAULT_LEARNER_PROFILE.dailyGoalLessons,
+  completedLessons: 0,
+  totalLessons: pinyinCurriculum.lessons.length + hsk1FoundationCurriculum.lessons.length,
+  completedCourses: 0,
+  totalCourses: 2,
 };
 
 function localDayKey(value: Date): string {
@@ -129,6 +142,7 @@ export function readLearningSummary(): LearningSummary {
   const fallback = pinyinNext ?? hskNext ?? { href: "/learn", title: "Оқу орталығын ашу" };
   const last = getStoredLastRoute();
   const wallet = getWalletSnapshot();
+  const learnerProfile = readLearnerProfile();
   const totalXP = getTotalXP();
   const xpLevel = getXPLevel(totalXP);
   const today = localDayKey(new Date());
@@ -137,6 +151,12 @@ export function readLearningSummary(): LearningSummary {
       transaction.source === "lesson" &&
       localDayKey(new Date(transaction.createdAt)) === today
   ).length;
+  const totalLessons = pinyinCurriculum.lessons.length + hsk1FoundationCurriculum.lessons.length;
+  const completedLessons = completedPinyin.length + completedHsk.length;
+  const completedCourses = [
+    pinyinCurriculum.lessons.length > 0 && completedPinyin.length >= pinyinCurriculum.lessons.length,
+    hsk1FoundationCurriculum.lessons.length > 0 && completedHsk.length >= hsk1FoundationCurriculum.lessons.length,
+  ].filter(Boolean).length;
 
   return {
     coinBalance: wallet.balance,
@@ -152,6 +172,12 @@ export function readLearningSummary(): LearningSummary {
     continueTitle: last?.title ?? fallback.title,
     lastModuleLabel: last?.module ?? (pinyinNext ? "Пиньинь" : hskNext ? "HSK 1" : "Оқу орталығы"),
     availableLevel: hskLevel?.displayName ?? "Деңгей дерегі қолжетімсіз",
+    learnerProfile,
+    dailyGoalLessons: learnerProfile.dailyGoalLessons,
+    completedLessons,
+    totalLessons,
+    completedCourses,
+    totalCourses: 2,
   };
 }
 
