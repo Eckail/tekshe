@@ -1,30 +1,40 @@
 import Link from "next/link";
-import FirstWords from "../components/FirstWords";
-import FirstWordsQuiz from "../components/FirstWordsQuiz";
 import PageHeading from "../components/PageHeading";
-import SentenceQuiz from "../components/SentenceQuiz";
-import SimpleSentences from "../components/SimpleSentences";
-import SyllableLesson from "../components/SyllableLesson";
-import SyllableQuiz from "../components/SyllableQuiz";
-import ToneQuiz from "../components/ToneQuiz";
 
 export default function PracticePage() {
   return (
-    <div className="space-y-8">
-      <PageHeading eyebrow="ҚАЙТАЛАУ ЖӘНЕ ТЕКСЕРУ" title="Жаттығу орталығы" description="Қолданыстағы тесттерді осында жинадық. Пиньинь мен HSK курстары бөлек модульдерде оқытылады." />
-      <nav className="flex flex-wrap gap-2" aria-label="Жаттығуға өту">
-        <Link href="/learn/pinyin" className="min-h-11 inline-flex items-center rounded-lg bg-charcoal px-4 text-sm font-semibold text-white hover:bg-terracotta">Пиньинь курсы</Link>
-        <Link href="/learn/hsk" className="min-h-11 inline-flex items-center rounded-lg border border-charcoal/15 px-4 text-sm font-semibold hover:border-terracotta/50">HSK 1 курсы</Link>
-      </nav>
-      <div className="space-y-2 rounded-xl border border-charcoal/10 bg-paper p-2 sm:p-4">
-        <FirstWords />
-        <FirstWordsQuiz />
-        <SimpleSentences />
-        <SentenceQuiz />
-        <SyllableLesson />
-        <SyllableQuiz />
-        <div id="tone-practice" className="scroll-mt-24"><ToneQuiz /></div>
-      </div>
+    <div className="space-y-7">
+      <PageHeading
+        eyebrow="ЖАТТЫҒУ"
+        title="Білімді бекіту"
+        description="Үйренген дыбыстар мен сөздерді жаттығу арқылы бекітіңіз."
+      />
+
+      <section className="rounded-card border border-border-soft bg-card p-6 shadow-card sm:p-8">
+        <h2 className="text-xl font-semibold tracking-tight text-text-primary">
+          Оқу модулін таңдаңыз
+        </h2>
+
+        <p className="mt-2 text-sm leading-6 text-text-secondary">
+          Қайталағыңыз келетін оқу бағытын таңдаңыз.
+        </p>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link
+            href="/learn/pinyin"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-blue/20 bg-blue px-5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-dark active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue"
+          >
+            Пиньинь курсы
+          </Link>
+
+          <Link
+            href="/learn/hsk"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border-soft bg-card-soft px-5 text-sm font-semibold text-text-primary transition-all duration-200 hover:border-blue/40 hover:bg-ice active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue"
+          >
+            HSK 1 курсы
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

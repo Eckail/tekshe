@@ -1,11 +1,12 @@
-
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   getCompletedCourses,
   type CourseId,
 } from "../data/courseProgress";
+import AppIcon from "./AppIcon";
 
 type LearningStage = {
   id: number;
@@ -104,91 +105,130 @@ export default function LearningPath() {
   const completedCount = completedCourses.length;
 
   return (
-    <section className="mx-auto max-w-5xl px-6 py-16">
-      <div className="mb-10">
-        <p className="text-xs uppercase tracking-[0.25em] text-terracotta">
-          YOUR LEARNING JOURNEY
-        </p>
+    <section aria-labelledby="learning-path-title">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[10px] font-semibold tracking-[0.18em] text-blue-dark">
+            YOUR LEARNING JOURNEY
+          </p>
 
-        <h2 className="mt-3 text-3xl font-bold text-charcoal">
-          Оқу жолы
-        </h2>
+          <h2
+            id="learning-path-title"
+            className="mt-2 text-2xl font-semibold tracking-tight text-text-primary"
+          >
+            Оқу жолы
+          </h2>
 
-        <p className="mt-2 text-sm text-charcoal/60">
-          Әр кезең жаңа білімге бастайды.
-        </p>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-text-secondary">
+            Негізгі білімнен алғашқы сөйлемдерге дейінгі оқу кезеңдері.
+          </p>
+        </div>
 
-        <p className="mt-4 text-sm text-charcoal/60">
+        <span className="inline-flex w-fit items-center gap-2 rounded-full bg-ice px-3.5 py-2 text-xs font-semibold text-blue-dark">
+          <AppIcon name="check" className="h-4 w-4" />
           {completedCount} / {stageDefinitions.length} курс аяқталды
-        </p>
+        </span>
       </div>
 
-      <div className="space-y-4">
-        {stages.map((stage, index) => (
-          <a
-            key={stage.id}
-            href={stage.status !== "locked" ? stage.href : undefined}
-            onClick={(event) => {
-              if (stage.status === "locked") {
-                event.preventDefault();
-              }
-            }}
-            aria-disabled={stage.status === "locked"}
-            className={`relative flex gap-5 rounded-2xl border p-5 transition sm:p-6 ${
-              stage.status === "locked"
-                ? "cursor-not-allowed border-charcoal/10 bg-charcoal/[0.02]"
-                : "cursor-pointer border-terracotta/30 bg-cream hover:border-terracotta hover:shadow-sm"
-            }`}
-          >
-            <div className="flex flex-col items-center">
-              <div
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-sm font-bold ${
-                  stage.status === "locked"
-                    ? "border-charcoal/20 text-charcoal/30"
-                    : stage.status === "completed"
-                      ? "border-terracotta bg-terracotta text-white"
-                      : "border-terracotta text-terracotta"
-                }`}
-              >
-                {stage.status === "completed" ? "✓" : stage.id}
-              </div>
+      <div className="rounded-[1.75rem] border border-border-soft bg-card p-5 shadow-sm sm:p-7">
+        <ol className="space-y-0">
+          {stages.map((stage, index) => {
+            const isCompleted = stage.status === "completed";
+            const isAvailable = stage.status === "available";
+            const isLocked = stage.status === "locked";
 
-              {index !== stages.length - 1 && (
-                <div className="mt-2 h-full min-h-8 w-px bg-charcoal/15" />
-              )}
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-[10px] tracking-[0.2em] text-terracotta">
-                  {stage.subtitle}
-                </p>
-
-                <span className="text-xs text-charcoal/50">
-                  {stage.status === "completed"
-                    ? "Аяқталды ✓"
-                    : stage.status === "available"
-                      ? "Қолжетімді"
-                      : "Құлыптаулы"}
+            const content = (
+              <>
+                <span
+                  className={`relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border text-sm font-semibold ${
+                    isCompleted
+                      ? "border-success/20 bg-success-bg text-success"
+                      : isAvailable
+                        ? "border-blue/20 bg-ice text-blue-dark"
+                        : "border-border-soft bg-card-soft text-text-secondary"
+                  }`}
+                >
+                  {isCompleted ? (
+                    <AppIcon name="check" className="h-5 w-5" />
+                  ) : (
+                    stage.id
+                  )}
                 </span>
-              </div>
 
-              <h3
-                className={`mt-2 text-lg font-semibold ${
-                  stage.status === "locked"
-                    ? "text-charcoal/40"
-                    : "text-charcoal"
-                }`}
-              >
-                {stage.title}
-              </h3>
+                <span className="min-w-0 flex-1 py-1">
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span className="text-[10px] font-semibold tracking-[0.16em] text-text-secondary">
+                      {stage.subtitle}
+                    </span>
 
-              <p className="mt-2 text-sm leading-6 text-charcoal/60">
-                {stage.description}
-              </p>
-            </div>
-          </a>
-        ))}
+                    {isCompleted && (
+                      <span className="rounded-full bg-success-bg px-2 py-1 text-[10px] font-semibold text-success">
+                        Аяқталды
+                      </span>
+                    )}
+
+                    {isAvailable && (
+                      <span className="rounded-full bg-ice px-2 py-1 text-[10px] font-semibold text-blue-dark">
+                        Қолжетімді
+                      </span>
+                    )}
+
+                    {isLocked && (
+                      <span className="rounded-full bg-card-soft px-2 py-1 text-[10px] font-medium text-text-secondary">
+                        Құлыптаулы
+                      </span>
+                    )}
+                  </span>
+
+                  <span className="mt-2 block font-semibold text-text-primary">
+                    {stage.title}
+                  </span>
+
+                  <span className="mt-1 block text-xs leading-5 text-text-secondary sm:text-sm">
+                    {stage.description}
+                  </span>
+                </span>
+
+                {!isLocked && (
+                  <AppIcon
+                    name="arrow"
+                    className="h-4 w-4 shrink-0 text-blue-dark transition-transform group-hover:translate-x-1"
+                  />
+                )}
+              </>
+            );
+
+            return (
+              <li key={stage.id} className="relative flex gap-4 pb-5 last:pb-0 sm:gap-5">
+                {index !== stages.length - 1 && (
+                  <span
+                    className={`absolute bottom-0 left-[21px] top-11 w-px ${
+                      isCompleted ? "bg-success/30" : "bg-border-soft"
+                    }`}
+                    aria-hidden="true"
+                  />
+                )}
+
+                {isLocked ? (
+                  <div
+                    aria-label={`${stage.title} — алдыңғы кезеңді аяқтаңыз`}
+                    aria-disabled="true"
+                    className="flex min-h-[94px] w-full items-center gap-3 rounded-2xl border border-border-soft/70 bg-card-soft/50 p-3 opacity-65 sm:gap-4 sm:p-4"
+                  >
+                    {content}
+                  </div>
+                ) : (
+                  <Link
+                    href={stage.href}
+                    className="group flex min-h-[94px] w-full items-center gap-3 rounded-2xl border border-border-soft bg-card-soft/45 p-3 transition duration-200 hover:border-blue/30 hover:bg-ice/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue sm:gap-4 sm:p-4"
+                  >
+                    {content}
+                  </Link>
+                )}
+              </li>
+            );
+          })}
+        </ol>
       </div>
     </section>
   );

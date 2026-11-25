@@ -1,9 +1,10 @@
+
 "use client";
 
 import Link from "next/link";
 import { useState, useSyncExternalStore, type FormEvent } from "react";
 import AppIcon from "./AppIcon";
-import LearnerAvatar from "./LearnerAvatar";
+import AvatarPhotoEditor from "./AvatarPhotoEditor";
 import PageHeading from "./PageHeading";
 import { hsk1FoundationCurriculum } from "../data/hsk1Foundation";
 import { learningSummaryStore } from "../data/learningSummary";
@@ -11,25 +12,99 @@ import {
   learnerProfileStore,
   saveLearnerProfile,
   type DailyLessonGoal,
-  type LearnerAvatarId,
   type LearnerProfile,
 } from "../data/learnerProfile";
 import { pinyinCurriculum } from "../data/pinyinCurriculum";
 
-const avatarOptions: { id: LearnerAvatarId; label: string }[] = [
-  { id: "terracotta", label: "Қыш" },
-  { id: "steppe", label: "Дала" },
-  { id: "charcoal", label: "Сия" },
-  { id: "sand", label: "Құм" },
-];
-
-function StatCard({ label, value, note }: { label: string; value: string; note: string }) {
+function StatRow({
+  label,
+  value,
+  note,
+}: {
+  label: string;
+  value: string;
+  note?: string;
+}) {
   return (
-    <article className="rounded-2xl bg-paper p-4 ring-1 ring-charcoal/5 sm:p-5">
-      <p className="text-xs text-charcoal/55">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tabular-nums">{value}</p>
-      <p className="mt-1 text-xs leading-5 text-charcoal/50">{note}</p>
-    </article>
+    <div className="flex items-center justify-between gap-4 py-3">
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-text-primary">{label}</p>
+        {note && (
+          <p className="mt-1 text-xs text-text-secondary">{note}</p>
+        )}
+      </div>
+      <p className="shrink-0 text-lg font-bold tracking-tight text-text-primary tabular-nums">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function SettingsRow({
+  href,
+  symbol,
+  title,
+  description,
+  status,
+}: {
+  href?: string;
+  symbol: string;
+  title: string;
+  description: string;
+  status?: string;
+}) {
+  const content = (
+    <>
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue/10 text-lg text-blue-dark">
+        {symbol}
+      </span>
+
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold text-text-primary">
+          {title}
+        </span>
+        <span className="mt-1 block text-xs text-text-secondary">
+          {description}
+        </span>
+      </span>
+
+      {status && (
+        <span className="shrink-0 text-xs text-text-secondary">
+          {status}
+        </span>
+      )}
+
+      {href ? (
+        <AppIcon
+          name="arrow"
+          className="h-4 w-4 shrink-0 text-text-secondary transition-transform duration-200 group-hover:translate-x-0.5"
+        />
+      ) : (
+        <span className="shrink-0 text-xs text-text-secondary">
+          Кейінірек
+        </span>
+      )}
+    </>
+  );
+
+  if (!href) {
+    return (
+      <div
+        aria-disabled="true"
+        className="flex min-h-[68px] items-center gap-3 px-4 py-3 opacity-60"
+      >
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      className="group flex min-h-[68px] items-center gap-3 px-4 py-3 transition-all duration-200 hover:bg-card-soft active:scale-[0.98]"
+    >
+      {content}
+    </Link>
   );
 }
 
@@ -39,63 +114,175 @@ export default function ProfileDashboard() {
     learnerProfileStore.getSnapshot,
     learnerProfileStore.getServerSnapshot
   );
+
   const summary = useSyncExternalStore(
     learningSummaryStore.subscribe,
     learningSummaryStore.getSnapshot,
     learningSummaryStore.getServerSnapshot
   );
-  const [draftState, setDraftState] = useState({ source: savedProfile, value: savedProfile });
-  const [message, setMessage] = useState<{ kind: "success" | "error"; text: string } | null>(null);
-  const draft = draftState.source === savedProfile ? draftState.value : savedProfile;
+
+  const [draftState, setDraftState] = useState({
+    source: savedProfile,
+    value: savedProfile,
+  });
+
+  const [message, setMessage] = useState<{
+    kind: "success" | "error";
+    text: string;
+  } | null>(null);
+
+  const draft =
+    draftState.source === savedProfile ? draftState.value : savedProfile;
 
   const pinyinCompleted = summary.completedPinyin.length;
   const hskCompleted = summary.completedHsk.length;
   const pinyinTotal = pinyinCurriculum.lessons.length;
   const hskTotal = hsk1FoundationCurriculum.lessons.length;
+
   const overallPercent = summary.totalLessons
-    ? Math.round((summary.completedLessons / summary.totalLessons) * 100)
+    ? Math.round(
+        (summary.completedLessons / summary.totalLessons) * 100
+      )
     : 0;
 
-  function updateDraft<K extends keyof LearnerProfile>(key: K, value: LearnerProfile[K]) {
-    setDraftState({ source: savedProfile, value: { ...draft, [key]: value } });
+  function updateDraft<K extends keyof LearnerProfile>(
+    key: K,
+    value: LearnerProfile[K]
+  ) {
+    setDraftState({
+      source: savedProfile,
+      value: { ...draft, [key]: value },
+    });
     setMessage(null);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     if (!draft.nickname.trim()) {
-      setMessage({ kind: "error", text: "Өзіңізге қысқа ат енгізіңіз." });
+      setMessage({
+        kind: "error",
+        text: "Өзіңізге қысқа ат енгізіңіз.",
+      });
       return;
     }
 
     const saved = saveLearnerProfile(draft);
-    setMessage(saved
-      ? { kind: "success", text: "Профиль осы құрылғыда сақталды." }
-      : { kind: "error", text: "Браузер бұл деректі сақтай алмады. Сақтау рұқсатын тексеріңіз." });
+
+    setMessage(
+      saved
+        ? {
+            kind: "success",
+            text: "Профиль осы құрылғыда сақталды.",
+          }
+        : {
+            kind: "error",
+            text: "Браузер бұл деректі сақтай алмады. Сақтау рұқсатын тексеріңіз.",
+          }
+    );
   }
 
+  const courses = [
+    {
+      title: "Пиньинь негіздері",
+      done: pinyinCompleted,
+      total: pinyinTotal,
+      href: "/learn/pinyin",
+      symbol: "拼",
+      tone: "blue",
+    },
+    {
+      title: "HSK 1 бастау курсы",
+      done: hskCompleted,
+      total: hskTotal,
+      href: "/learn/hsk",
+      symbol: "汉",
+      tone: "mint",
+    },
+  ];
+
   return (
-    <div className="space-y-8 pb-2 sm:space-y-10">
+    <div className="space-y-5 pb-6 sm:space-y-6">
       <PageHeading
         eyebrow="ЖЕКЕ ОҚУ КЕҢІСТІГІ"
         title="Профиль"
-        description="Оқушы атыңыз бен күндік мақсатыңызды баптаңыз. Бұл профиль тек осы браузерде сақталады."
+        description="Жеке мәліметтеріңіз бен оқу барысыңызды осы жерден басқарыңыз."
       />
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)]">
-        <section className="overflow-hidden rounded-[1.75rem] bg-paper ring-1 ring-charcoal/5" aria-labelledby="profile-settings-title">
-          <div className="flex items-center gap-4 border-b border-charcoal/8 bg-paper-alt/45 p-5 sm:p-7">
-            <LearnerAvatar avatarId={draft.avatarId} nickname={draft.nickname} className="h-14 w-14 rounded-2xl text-xl" />
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-terracotta">ОҚУШЫ · ЖЕРГІЛІКТІ БЕТА</p>
-              <p className="mt-1 truncate text-xl font-semibold">{draft.nickname || "Оқушы"}</p>
+      {/* 1. Profile */}
+      <section
+        className="overflow-hidden rounded-card border border-border-soft bg-card shadow-card"
+        aria-labelledby="profile-title"
+      >
+        <div className="relative h-[140px] overflow-hidden bg-gradient-to-br from-sky/70 via-card-soft to-mint/50">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 900 220"
+            preserveAspectRatio="xMidYMid slice"
+            className="absolute inset-0 h-full w-full text-blue/20"
+            fill="none"
+          >
+            <path
+              d="M0 174 105 103 171 147 287 42 397 151 492 83 607 159 711 68 900 176V220H0Z"
+              fill="currentColor"
+            />
+            <path
+              d="m105 103 36 25-19 2-17-27Zm182-61 42 43-25-9-17-34Zm205 41 37 27-24-6-13-21Zm219-15 43 40-26-10-17-30Z"
+              fill="currentColor"
+              opacity=".65"
+            />
+            <path
+              d="M0 188c132-26 224-8 336 4 141 15 244-23 361-14 82 6 140 22 203 12v30H0Z"
+              fill="currentColor"
+              opacity=".45"
+            />
+          </svg>
+
+          <div
+            aria-hidden="true"
+            className="absolute -right-8 -top-16 h-48 w-48 rounded-full bg-card/30 blur-3xl"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute -bottom-20 -left-10 h-40 w-64 rounded-full bg-mint/40 blur-3xl"
+          />
+        </div>
+
+        <div className="relative px-5 pb-5 sm:px-7 sm:pb-7">
+          <div className="-mt-12 flex flex-col items-center text-center">
+            <div className="rounded-[24px] border-4 border-card bg-card p-1 shadow-floating">
+              <AvatarPhotoEditor
+                avatarId={draft.avatarId}
+                nickname={draft.nickname}
+              />
             </div>
+
+            <h2
+              id="profile-title"
+              className="mt-3 text-xl font-bold tracking-tight text-text-primary sm:text-2xl"
+            >
+              {draft.nickname || "Оқушы"}
+            </h2>
+
+            <span className="mt-2 inline-flex items-center rounded-full border border-blue/15 bg-blue/10 px-3 py-1 text-xs font-semibold text-blue-dark">
+              Tekshe · Оқушы профилі
+            </span>
           </div>
 
-          <form className="space-y-7 p-5 sm:p-7" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="mt-6 space-y-5">
             <div>
-              <label htmlFor="learner-nickname" className="block text-sm font-semibold">Оқушының қысқа аты</label>
-              <p id="nickname-help" className="mt-1 text-xs leading-5 text-charcoal/55">Шын аты-жөніңізді енгізудің қажеті жоқ.</p>
+              <label
+                htmlFor="learner-nickname"
+                className="block text-sm font-semibold text-text-primary"
+              >
+                Оқушының қысқа аты
+              </label>
+              <p
+                id="nickname-help"
+                className="mt-1 text-xs leading-5 text-text-secondary"
+              >
+                Шын аты-жөніңізді енгізудің қажеті жоқ.
+              </p>
               <input
                 id="learner-nickname"
                 name="nickname"
@@ -104,45 +291,39 @@ export default function ProfileDashboard() {
                 maxLength={24}
                 required
                 value={draft.nickname}
-                onChange={(event) => updateDraft("nickname", event.target.value)}
+                onChange={(event) =>
+                  updateDraft("nickname", event.target.value)
+                }
                 aria-describedby="nickname-help"
-                className="mt-3 min-h-12 w-full rounded-xl border border-charcoal/12 bg-cream/35 px-4 text-base text-charcoal outline-none transition focus:border-terracotta focus:ring-4 focus:ring-terracotta/10"
+                className="mt-3 min-h-12 w-full rounded-control border border-border-soft bg-card-soft px-4 text-base text-text-primary outline-none transition focus:border-blue focus:ring-4 focus:ring-blue/10"
               />
             </div>
 
-            <fieldset>
-              <legend className="text-sm font-semibold">Аватар түсін таңдаңыз</legend>
-              <p className="mt-1 text-xs leading-5 text-charcoal/55">Сурет жүктелмейді; бұл — осы бетке арналған қарапайым белгі.</p>
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {avatarOptions.map((avatar) => (
-                  <label key={avatar.id} className="cursor-pointer">
-                    <input
-                      className="peer sr-only"
-                      type="radio"
-                      name="avatarId"
-                      value={avatar.id}
-                      checked={draft.avatarId === avatar.id}
-                      onChange={() => updateDraft("avatarId", avatar.id)}
-                    />
-                    <span className="flex min-h-16 items-center gap-2 rounded-xl border border-charcoal/8 px-3 transition hover:border-charcoal/20 peer-checked:border-terracotta peer-checked:bg-cream/60 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-terracotta">
-                      <LearnerAvatar avatarId={avatar.id} nickname={draft.nickname} className="h-9 w-9 rounded-xl text-sm" />
-                      <span className="text-xs font-medium">{avatar.label}</span>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-
             <div>
-              <label htmlFor="daily-goal" className="block text-sm font-semibold">Күндік сабақ мақсаты</label>
-              <p id="goal-help" className="mt-1 text-xs leading-5 text-charcoal/55">Dashboard-тағы бүгінгі мақсат осы таңдауға сай өзгереді.</p>
+              <label
+                htmlFor="daily-goal"
+                className="block text-sm font-semibold text-text-primary"
+              >
+                Күндік сабақ мақсаты
+              </label>
+              <p
+                id="goal-help"
+                className="mt-1 text-xs leading-5 text-text-secondary"
+              >
+                Dashboard-тағы бүгінгі мақсат осы таңдауға сай өзгереді.
+              </p>
               <select
                 id="daily-goal"
                 name="dailyGoalLessons"
                 value={draft.dailyGoalLessons}
-                onChange={(event) => updateDraft("dailyGoalLessons", Number(event.target.value) as DailyLessonGoal)}
+                onChange={(event) =>
+                  updateDraft(
+                    "dailyGoalLessons",
+                    Number(event.target.value) as DailyLessonGoal
+                  )
+                }
                 aria-describedby="goal-help"
-                className="mt-3 min-h-12 w-full rounded-xl border border-charcoal/12 bg-cream/35 px-4 text-base text-charcoal outline-none transition focus:border-terracotta focus:ring-4 focus:ring-terracotta/10"
+                className="mt-3 min-h-12 w-full rounded-control border border-border-soft bg-card-soft px-4 text-base text-text-primary outline-none transition focus:border-blue focus:ring-4 focus:ring-blue/10"
               >
                 <option value={1}>Күніне 1 сабақ</option>
                 <option value={2}>Күніне 2 сабақ</option>
@@ -150,88 +331,308 @@ export default function ProfileDashboard() {
               </select>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl bg-cream/55 p-4">
-                <p className="text-xs text-charcoal/55">Оқыту тілі</p>
-                <p className="mt-1 text-sm font-semibold">Қазақ тілі</p>
-              </div>
-              <div className="rounded-xl bg-cream/55 p-4">
-                <p className="text-xs text-charcoal/55">Үйреніп жатқан тіл</p>
-                <p className="mt-1 text-sm font-semibold">Мандарин қытай тілі</p>
-              </div>
+            <div className="divide-y divide-border-soft rounded-secondary border border-border-soft bg-card-soft px-4">
+              <StatRow label="Оқыту тілі" value="Қазақ тілі" />
+              <StatRow label="Үйреніп жатқан тіл" value="Мандарин қытай тілі" />
             </div>
 
-            <div className="flex flex-col gap-3 border-t border-charcoal/8 pt-5 sm:flex-row sm:items-center sm:justify-between">
-              <p aria-live="polite" role={message?.kind === "error" ? "alert" : "status"} className={`min-h-5 text-sm ${message?.kind === "error" ? "text-danger" : "text-steppe"}`}>
+            <div className="flex flex-col gap-3 border-t border-border-soft pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <p
+                aria-live="polite"
+                role={message?.kind === "error" ? "alert" : "status"}
+                className={`min-h-5 text-sm ${
+                  message?.kind === "error"
+                    ? "text-danger"
+                    : "text-success"
+                }`}
+              >
                 {message?.text ?? ""}
               </p>
-              <button type="submit" className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-charcoal px-5 text-sm font-semibold text-white transition-colors hover:bg-terracotta focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta">
-                <AppIcon name="check" className="h-4 w-4" /> Өзгерістерді сақтау
+
+              <button
+                type="submit"
+                className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-blue px-6 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-dark active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue"
+              >
+                <AppIcon name="check" className="h-4 w-4" />
+                Өзгерістерді сақтау
               </button>
             </div>
           </form>
-        </section>
-
-        <div className="space-y-5">
-          <section className="rounded-[1.75rem] bg-charcoal p-5 text-cream sm:p-7" aria-labelledby="profile-progress-title">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cream/55">ОҚУ БАРЫСЫ</p>
-                <h2 id="profile-progress-title" className="mt-2 text-xl font-semibold">Қадамыңыз көрініп тұр</h2>
-              </div>
-              <span className="rounded-full border border-cream/15 px-3 py-1.5 text-xs text-cream/70">{overallPercent}%</span>
-            </div>
-            <div className="mt-6 h-2 overflow-hidden rounded-full bg-cream/15" role="progressbar" aria-label="Жалпы оқу барысы" aria-valuemin={0} aria-valuemax={100} aria-valuenow={overallPercent}>
-              <div className="h-full rounded-full bg-terracotta transition-[width] duration-500" style={{ width: `${overallPercent}%` }} />
-            </div>
-            <p className="mt-3 text-sm text-cream/65">{summary.completedLessons} / {summary.totalLessons} сабақ аяқталды</p>
-            <Link href={summary.continueHref} className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-cream underline decoration-cream/35 underline-offset-4 transition hover:text-white hover:decoration-white">
-              {summary.lastModuleLabel}: {summary.continueTitle} <AppIcon name="arrow" className="h-4 w-4" />
-            </Link>
-          </section>
-
-          <section aria-label="Нақты оқу статистикасы">
-            <div className="grid grid-cols-2 gap-3">
-              <StatCard label="Аяқталған курс" value={`${summary.completedCourses} / ${summary.totalCourses}`} note="Пиньинь және HSK 1" />
-              <StatCard label="Жаттығу" value={String(summary.practiceCount)} note="Сақталған нәтиже" />
-              <StatCard label="XP деңгейі" value={`${summary.progressLevel}`} note={summary.progressLevelTitle} />
-              <StatCard label="Tek Coin" value={new Intl.NumberFormat("kk-KZ").format(summary.coinBalance)} note={`${summary.totalCoinsEarned} барлығы жиналды`} />
-            </div>
-          </section>
         </div>
-      </div>
+      </section>
 
-      <section className="rounded-[1.75rem] bg-paper p-5 ring-1 ring-charcoal/5 sm:p-7" aria-labelledby="course-progress-title">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-terracotta">КУРСТАР</p>
-            <h2 id="course-progress-title" className="mt-2 text-xl font-semibold">Оқу жолыңыз</h2>
+      {/* 2. Learning progress */}
+      <section
+        className="rounded-card border border-border-soft bg-card p-5 shadow-card sm:p-6"
+        aria-labelledby="learning-progress-title"
+      >
+        <div className="mb-5">
+          <p className="text-[10px] font-bold tracking-[0.18em] text-blue-dark">
+            LEARNING PROGRESS
+          </p>
+          <h2
+            id="learning-progress-title"
+            className="mt-1 text-lg font-bold text-text-primary"
+          >
+            Жалпы оқу барысы
+          </h2>
+        </div>
+
+        <div
+          className="h-2.5 overflow-hidden rounded-full bg-card-soft"
+          role="progressbar"
+          aria-label="Жалпы оқу барысы"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={overallPercent}
+        >
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-blue to-mint-dark transition-[width] duration-500"
+            style={{ width: `${overallPercent}%` }}
+          />
+        </div>
+
+        <div className="mt-5 grid grid-cols-3 divide-x divide-border-soft">
+          <div className="px-2 text-center">
+            <p className="text-2xl font-bold tracking-tight text-text-primary tabular-nums">
+              {summary.completedLessons}
+            </p>
+            <p className="mt-1 text-xs text-text-secondary">
+              Аяқталды
+            </p>
           </div>
-          <Link href="/learn" className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-charcoal hover:text-terracotta">Оқу орталығын ашу <AppIcon name="arrow" className="h-4 w-4" /></Link>
+
+          <div className="px-2 text-center">
+            <p className="text-2xl font-bold tracking-tight text-text-primary tabular-nums">
+              {summary.totalLessons}
+            </p>
+            <p className="mt-1 text-xs text-text-secondary">
+              Барлығы
+            </p>
+          </div>
+
+          <div className="px-2 text-center">
+            <p className="text-2xl font-bold tracking-tight text-blue-dark tabular-nums">
+              {overallPercent}%
+            </p>
+            <p className="mt-1 text-xs text-text-secondary">
+              Нәтиже
+            </p>
+          </div>
         </div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          {[
-            { title: "Пиньинь негіздері", done: pinyinCompleted, total: pinyinTotal, href: "/learn/pinyin" },
-            { title: "HSK 1 бастау курсы", done: hskCompleted, total: hskTotal, href: "/learn/hsk" },
-          ].map((course) => {
-            const percent = course.total ? Math.round((course.done / course.total) * 100) : 0;
+
+        <Link
+          href={summary.continueHref}
+          className="mt-5 flex min-h-12 items-center justify-between gap-3 rounded-secondary border border-border-soft bg-card-soft px-4 text-sm font-semibold text-text-primary transition-all duration-200 hover:border-blue/40 active:scale-[0.98]"
+        >
+          <span className="min-w-0 truncate">
+            {summary.lastModuleLabel}: {summary.continueTitle}
+          </span>
+          <AppIcon name="arrow" className="h-4 w-4 shrink-0 text-blue-dark" />
+        </Link>
+      </section>
+
+      {/* 3. Study statistics */}
+      <section
+        className="rounded-card border border-border-soft bg-card p-5 shadow-card sm:p-6"
+        aria-labelledby="study-statistics-title"
+      >
+        <div className="mb-3">
+          <p className="text-[10px] font-bold tracking-[0.18em] text-blue-dark">
+            STUDY STATISTICS
+          </p>
+          <h2
+            id="study-statistics-title"
+            className="mt-1 text-lg font-bold text-text-primary"
+          >
+            Оқу статистикасы
+          </h2>
+          <p className="mt-1 text-xs text-text-secondary">
+            Қолда бар оқу жазбаларының негізінде.
+          </p>
+        </div>
+
+        <div className="divide-y divide-border-soft">
+          <StatRow
+            label="Аяқталған курстар"
+            value={`${summary.completedCourses} / ${summary.totalCourses}`}
+            note="Пиньинь және HSK 1"
+          />
+          <StatRow
+            label="Орындалған жаттығулар"
+            value={String(summary.practiceCount)}
+            note="Сақталған нәтиже"
+          />
+          <StatRow
+            label="XP деңгейі"
+            value={String(summary.progressLevel)}
+            note={summary.progressLevelTitle}
+          />
+          <StatRow
+            label="Tek Coin балансы"
+            value={new Intl.NumberFormat("kk-KZ").format(
+              summary.coinBalance
+            )}
+            note={`${summary.totalCoinsEarned} барлығы жиналды`}
+          />
+        </div>
+      </section>
+
+      {/* 4. Course progress */}
+      <section
+        className="rounded-card border border-border-soft bg-card p-5 shadow-card sm:p-6"
+        aria-labelledby="course-progress-title"
+      >
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-bold tracking-[0.18em] text-blue-dark">
+              MY COURSES
+            </p>
+            <h2
+              id="course-progress-title"
+              className="mt-1 text-lg font-bold text-text-primary"
+            >
+              Оқу курстарым
+            </h2>
+          </div>
+
+          <Link
+            href="/learn"
+            className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-blue-dark transition hover:opacity-75"
+          >
+            Барлығы
+            <AppIcon name="arrow" className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        <div className="divide-y divide-border-soft">
+          {courses.map((course) => {
+            const percent = course.total
+              ? Math.round((course.done / course.total) * 100)
+              : 0;
+
+            const isMint = course.tone === "mint";
+
             return (
-              <Link key={course.href} href={course.href} className="rounded-2xl bg-cream/45 p-4 transition hover:bg-cream/75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta sm:p-5">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="font-semibold">{course.title}</span>
-                  <span className="text-xs tabular-nums text-charcoal/55">{course.done} / {course.total}</span>
-                </div>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-charcoal/10" role="progressbar" aria-label={`${course.title} барысы`} aria-valuemin={0} aria-valuemax={course.total} aria-valuenow={course.done}>
-                  <div className="h-full rounded-full bg-steppe transition-[width] duration-500" style={{ width: `${percent}%` }} />
-                </div>
+              <Link
+                key={course.href}
+                href={course.href}
+                className="group flex items-center gap-3 py-4 transition-all duration-200 active:scale-[0.98]"
+              >
+                <span
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-secondary text-lg font-bold ${
+                    isMint
+                      ? "bg-mint/40 text-mint-dark"
+                      : "bg-blue/10 text-blue-dark"
+                  }`}
+                >
+                  {course.symbol}
+                </span>
+
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center justify-between gap-3">
+                    <span className="truncate text-sm font-semibold text-text-primary">
+                      {course.title}
+                    </span>
+                    <span className="shrink-0 text-xs font-semibold text-text-secondary tabular-nums">
+                      {percent}%
+                    </span>
+                  </span>
+
+                  <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-card-soft">
+                    <span
+                      className={`block h-full rounded-full transition-[width] duration-500 ${
+                        isMint ? "bg-mint-dark" : "bg-blue"
+                      }`}
+                      style={{ width: `${percent}%` }}
+                    />
+                  </span>
+
+                  <span className="mt-1.5 block text-xs text-text-secondary">
+                    {course.done} / {course.total} сабақ аяқталды
+                  </span>
+                </span>
+
+                <AppIcon
+                  name="arrow"
+                  className="h-4 w-4 shrink-0 text-text-secondary transition-transform duration-200 group-hover:translate-x-0.5"
+                />
               </Link>
             );
           })}
         </div>
       </section>
 
-      <aside className="rounded-2xl border border-charcoal/8 bg-paper/55 p-4 text-xs leading-5 text-charcoal/60 sm:p-5">
-        Бұл — жергілікті бета профиль. Тіркелгі, бұлттық сақтау және басқа құрылғымен синхрондау жоқ. Шын аты-жөніңіз, телефон нөміріңіз не электрондық поштаңыз сұралмайды.
+      {/* 5. App settings */}
+      <section
+        className="rounded-card border border-border-soft bg-card p-5 shadow-card sm:p-6"
+        aria-labelledby="app-settings-title"
+      >
+        <div className="mb-3">
+          <p className="text-[10px] font-bold tracking-[0.18em] text-blue-dark">
+            APP SETTINGS
+          </p>
+          <h2
+            id="app-settings-title"
+            className="mt-1 text-lg font-bold text-text-primary"
+          >
+            Қолданба параметрлері
+          </h2>
+        </div>
+
+        <div className="divide-y divide-border-soft">
+          <SettingsRow
+            href="/settings/language"
+            symbol="文"
+            title="Тіл және оқу параметрлері"
+            description="Қолданба тілі және пиньинь көрінісі"
+            status="Қазақша"
+          />
+
+          <SettingsRow
+            href="/settings/appearance"
+            symbol="◐"
+            title="Көрініс және тақырып"
+            description="Жарық, қараңғы немесе жүйелік режим"
+          />
+
+          <SettingsRow
+            symbol="♙"
+            title="Тіркелгі параметрлері"
+            description="Тіркелгі мен қауіпсіздік"
+          />
+
+   <SettingsRow
+  href="/settings/notifications"
+  symbol="♧"
+  title="Хабарландырулар"
+  description="Еске салғыштар мен оқу хабарламалары"
+/>
+
+          <SettingsRow
+            symbol="ⓘ"
+            title="Көмек және қолдау"
+            description="Жиі қойылатын сұрақтар мен кері байланыс"
+          />
+        </div>
+      </section>
+
+      {/* 6. Local beta notice */}
+      <aside className="flex items-start gap-3 rounded-secondary border border-border-soft bg-card-soft/80 p-4">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue/10 text-sm font-semibold text-blue-dark">
+          i
+        </span>
+
+        <div className="min-w-0">
+          <p className="text-xs font-semibold text-text-primary">
+            Tekshe · Local Beta
+          </p>
+          <p className="mt-1 text-xs leading-5 text-text-secondary">
+            Бұл — жергілікті бета нұсқа. Профиль мен аватар деректері осы
+            браузерде сақталады. Тіркелгі, бұлттық сақтау және басқа
+            құрылғымен синхрондау әзірге жоқ.
+          </p>
+        </div>
       </aside>
     </div>
   );

@@ -31,23 +31,23 @@ export default function Achievements() {
   ).length;
 
   return (
-    <section className="mx-auto max-w-5xl px-6 py-12">
+    <section className="mx-auto w-full max-w-5xl rounded-3xl border border-border-soft bg-card p-5 shadow-sm sm:p-7">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-terracotta">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-dark">
             ОҚУ БЕЛГІЛЕРІ
           </p>
 
-          <h2 className="mt-2 text-2xl font-semibold text-charcoal">
+          <h2 className="mt-2 text-2xl font-semibold text-text-primary">
             Жетістіктер
           </h2>
 
-          <p className="mt-2 text-sm text-charcoal/65">
+          <p className="mt-2 text-sm leading-6 text-text-secondary">
             Әр жетістік — еңбегіңіздің белгісі.
           </p>
         </div>
 
-        <p className="text-sm text-charcoal/65">
+        <p className="text-sm leading-6 text-text-secondary">
           {unlockedCount} / {achievements.length} ашылды
         </p>
       </div>
@@ -58,16 +58,16 @@ export default function Achievements() {
             key={achievement.id}
             className={`rounded-xl border p-5 transition-colors ${
               achievement.unlocked
-                ? "border-terracotta/40 bg-paper"
-                : "border-charcoal/10 bg-charcoal/[0.03]"
+                ? "border-blue/30 bg-card shadow-sm"
+                : "border-border-soft bg-ice/50"
             }`}
           >
             <div className="flex items-start justify-between gap-4">
               <div
                 className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${
                   achievement.unlocked
-                    ? "border-terracotta text-terracotta"
-                    : "border-charcoal/20 text-charcoal/35"
+                    ? "border-blue/30 bg-ice text-blue-dark"
+                    : "border-border-soft bg-ice/60 text-text-secondary"
                 }`}
               >
                 <span className="text-xl">
@@ -75,7 +75,7 @@ export default function Achievements() {
                 </span>
               </div>
 
-              <p className="text-sm font-semibold text-terracotta">
+              <p className="text-sm font-semibold text-blue-dark">
                 +{TEK_COIN_REWARDS.achievement} Tek Coin
               </p>
             </div>
@@ -83,32 +83,32 @@ export default function Achievements() {
             <h3
               className={`mt-5 text-lg font-semibold ${
                 achievement.unlocked
-                  ? "text-charcoal"
-                  : "text-charcoal/45"
+                  ? "text-text-primary"
+                  : "text-text-secondary"
               }`}
             >
               {achievement.title}
             </h3>
 
-            <p className="mt-2 text-sm text-charcoal/65">
+            <p className="mt-2 text-sm leading-6 text-text-secondary">
               {achievement.description}
             </p>
 
-            <div className="mt-5 border-t border-charcoal/10 pt-4">
+            <div className="mt-5 border-t border-border-soft pt-4">
               {achievement.claimed ? (
-                <span className="text-sm font-medium text-charcoal/55">
+                <span className="text-sm font-medium text-mint-dark">
                   Сыйлық алынды ✓
                 </span>
               ) : achievement.unlocked ? (
                 <button
                     type="button"
                   onClick={() => handleClaim(achievement.id)}
-                    className="min-h-11 rounded-lg bg-charcoal px-5 py-2 text-sm text-white transition-colors hover:bg-terracotta focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta"
+                    className="min-h-11 min-h-11 rounded-xl bg-blue-dark px-5 py-2 text-sm font-semibold text-white transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue"
                 >
                   Сыйлықты алу
                 </button>
               ) : (
-                <span className="text-sm text-charcoal/45">
+                <span className="text-sm text-text-secondary">
                   Әлі ашылған жоқ
                 </span>
               )}

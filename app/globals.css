@@ -1,20 +1,95 @@
 @import "tailwindcss";
 
 :root {
-  --tekshe-cream: #F3EDE1;
-  --tekshe-charcoal: #242321;
-  --tekshe-terracotta: #B85F3D;
-  --tekshe-steppe: #52766B;
-  --tekshe-sand: #D8CBB5;
-  --tekshe-paper: #FFFFFF;
-  --tekshe-paper-alt: #EAE2D5;
-  --tekshe-danger: #9B3E28;
-  --background: var(--tekshe-cream);
-  --foreground: var(--tekshe-charcoal);
+  /* Tekshe — new visual foundation */
+  --tekshe-ice: #EAF4FA;
+  --tekshe-sky: #BBDDEB;
+  --tekshe-blue: #5B9DB8;
+  --tekshe-blue-dark: #397D98;
+  --tekshe-mint: #C8E9DF;
+  --tekshe-mint-dark: #39796B;
+  --tekshe-warm-white: #FCFCF8;
+
+  --tekshe-text: #263746;
+  --tekshe-text-secondary: #718493;
+  --tekshe-border: #DCE8ED;
+
+  --tekshe-success: #39796B;
+  --tekshe-success-bg: #E2F3EC;
+  --tekshe-danger: #B94D52;
+  --tekshe-danger-bg: #FBEAEC;
+  --tekshe-warning: #A87935;
+  --tekshe-warning-bg: #FAF0DC;
+
+  --tekshe-card: #FFFFFF;
+  --tekshe-card-soft: #F5FAFC;
+  --tekshe-shadow: 0 8px 28px rgb(38 55 70 / 7%);
+
+      /* Design system */
+  --tekshe-radius-card: 24px;
+  --tekshe-radius-secondary: 18px;
+  --tekshe-radius-control: 14px;
+  --tekshe-radius-pill: 9999px;
+
+  --tekshe-shadow-card:
+    0 8px 24px rgb(38 55 70 / 4%),
+    0 2px 6px rgb(38 55 70 / 2%);
+
+  --tekshe-shadow-floating:
+    0 12px 32px rgb(38 55 70 / 8%);
+
+  --tekshe-transition: 200ms cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  /* Legacy aliases — keep existing components working during migration */
+  --tekshe-cream: var(--tekshe-ice);
+  --tekshe-charcoal: var(--tekshe-text);
+  --tekshe-terracotta: var(--tekshe-blue);
+  --tekshe-steppe: var(--tekshe-mint-dark);
+  --tekshe-sand: var(--tekshe-sky);
+  --tekshe-paper: var(--tekshe-card);
+  --tekshe-paper-alt: var(--tekshe-card-soft);
+
+  --background: var(--tekshe-ice);
+  --foreground: var(--tekshe-text);
+
   color-scheme: light;
 }
 
+
 @theme inline {
+  /* New semantic color utilities */
+  --color-ice: var(--tekshe-ice);
+  --color-sky: var(--tekshe-sky);
+  --color-blue: var(--tekshe-blue);
+  --color-blue-dark: var(--tekshe-blue-dark);
+  --color-mint: var(--tekshe-mint);
+  --color-mint-dark: var(--tekshe-mint-dark);
+  --color-warm-white: var(--tekshe-warm-white);
+
+  --color-text-primary: var(--tekshe-text);
+  --color-text-secondary: var(--tekshe-text-secondary);
+  --color-border-soft: var(--tekshe-border);
+
+  --color-success: var(--tekshe-success);
+  --color-success-bg: var(--tekshe-success-bg);
+  --color-danger: var(--tekshe-danger);
+  --color-danger-bg: var(--tekshe-danger-bg);
+  --color-warning: var(--tekshe-warning);
+  --color-warning-bg: var(--tekshe-warning-bg);
+
+  --color-card: var(--tekshe-card);
+  --color-card-soft: var(--tekshe-card-soft);
+
+        /* Design utilities */
+  --radius-card: var(--tekshe-radius-card);
+  --radius-secondary: var(--tekshe-radius-secondary);
+  --radius-control: var(--tekshe-radius-control);
+  --radius-pill: var(--tekshe-radius-pill);
+
+  --shadow-card: var(--tekshe-shadow-card);
+  --shadow-floating: var(--tekshe-shadow-floating);
+
+  /* Legacy utility names */
   --color-cream: var(--tekshe-cream);
   --color-charcoal: var(--tekshe-charcoal);
   --color-terracotta: var(--tekshe-terracotta);
@@ -22,17 +97,23 @@
   --color-sand: var(--tekshe-sand);
   --color-paper: var(--tekshe-paper);
   --color-paper-alt: var(--tekshe-paper-alt);
-  --color-danger: var(--tekshe-danger);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+
+  /* Typography */
+ --font-sans: var(--font-noto-sans);
   --font-mono: var(--font-geist-mono);
+
   --text-display: clamp(2rem, 5vw, 3.5rem);
   --text-page-title: clamp(1.8rem, 4vw, 2.5rem);
   --text-section-title: clamp(1.25rem, 2.4vw, 1.75rem);
   --text-body: 1rem;
   --text-caption: 0.75rem;
 }
+
+
+
 
 html {
   min-height: 100%;
@@ -42,9 +123,54 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-family:
+  var(--font-noto-sans),
+  "Microsoft YaHei",
+  "Noto Sans SC",
+  "Noto Sans CJK SC",
+  "PingFang SC",
+  "Source Han Sans SC",
+  sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Tekshe interaction foundation */
+
+button,
+a,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  transition:
+    transform var(--tekshe-transition),
+    box-shadow var(--tekshe-transition),
+    background-color var(--tekshe-transition);
+}
+
+button:not(:disabled):active,
+[role="button"]:not([aria-disabled="true"]):active {
+  transform: scale(0.97);
+}
+
+a {
+  text-decoration: none;
+}
+
+::placeholder {
+  color: var(--tekshe-text-secondary);
+  opacity: 0.7;
+}
+
+@supports (height: 100dvh) {
+  html,
+  body {
+    min-height: 100dvh;
+  }
 }
 
 button,
@@ -71,3 +197,52 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Tekshe — Dark Theme */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --tekshe-ice: #0B1426;
+  --tekshe-sky: #162943;
+  --tekshe-blue: #76BDE0;
+  --tekshe-blue-dark: #8DCFF0;
+  --tekshe-mint: #193C3A;
+  --tekshe-mint-dark: #8AD6C0;
+  --tekshe-warm-white: #101B2E;
+
+  --tekshe-text: #E8F1FA;
+  --tekshe-text-secondary: #A6B7C9;
+  --tekshe-border: #263A52;
+
+  --tekshe-success: #8AD6C0;
+  --tekshe-success-bg: #173A35;
+  --tekshe-danger: #F08F9A;
+  --tekshe-danger-bg: #40252F;
+  --tekshe-warning: #E8BD78;
+  --tekshe-warning-bg: #3D3325;
+
+  --tekshe-card: #142238;
+  --tekshe-card-soft: #101E33;
+  --tekshe-shadow: 0 8px 28px rgb(0 0 0 / 18%);
+
+  --tekshe-shadow-card:
+    0 8px 24px rgb(0 0 0 / 16%),
+    0 2px 6px rgb(0 0 0 / 10%);
+
+  --tekshe-shadow-floating:
+    0 12px 32px rgb(0 0 0 / 28%);
+
+  --background: var(--tekshe-ice);
+  --foreground: var(--tekshe-text);
+}
+
+:root[data-theme="dark"] body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+:root[data-theme="dark"] ::selection {
+  background: rgb(118 189 224 / 30%);
+}
+
+

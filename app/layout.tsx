@@ -1,18 +1,20 @@
-import type { Metadata } from "next";
-import type { Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Geist_Mono, Noto_Sans } from "next/font/google";
 import AppShell from "./components/AppShell";
 import ServiceWorkerRegistration from "./components/ServiceWorkerRegistration";
+import { ThemeProvider } from "./components/ThemeProvider";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const notoSans = Noto_Sans({
+  variable: "--font-noto-sans",
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -27,18 +29,44 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#F3EDE1",
-  colorScheme: "light",
+  themeColor: "#EAF4FA",
+  colorScheme: "light dark",
 };
+
+const themeBootstrap = `
+(function () {
+  try {
+    var saved = localStorage.getItem("tekshe-theme:v1");
+    var theme = saved === "light" || saved === "dark" || saved === "system"
+      ? saved
+      : "system";
+
+    var dark = theme === "dark" ||
+      (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+    var resolved = dark ? "dark" : "light";
+    document.documentElement.dataset.theme = resolved;
+    document.documentElement.style.colorScheme = resolved;
+  } catch (error) {
+    document.documentElement.dataset.theme = "light";
+  }
+})();
+`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="kk"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${notoSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+      </head>
       <body className="min-h-full">
-        <AppShell>{children}</AppShell>
+        <ThemeProvider>
+          <AppShell>{children}</AppShell>
+        </ThemeProvider>
         <ServiceWorkerRegistration />
       </body>
     </html>
