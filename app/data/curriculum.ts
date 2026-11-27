@@ -193,6 +193,8 @@ export type CurriculumExercise = {
   audioText?: string;
   audioAssetId?: string;
   readingMaterialId?: string;
+  /** Versioned vocabulary IDs whose recall is assessed by this exercise. */
+  reviewItemIds?: string[];
 };
 
 export type CurriculumLesson = {

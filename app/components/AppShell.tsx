@@ -13,6 +13,7 @@ const navItems: { href: string; label: string; icon: AppIconName }[] = [
   { href: "/", label: "Басты бет", icon: "home" },
   { href: "/learn", label: "Оқу", icon: "book" },
   { href: "/practice", label: "Жаттығу", icon: "practice" },
+  { href: "/review", label: "Қайталау", icon: "review" },
   { href: "/progress", label: "Ілгерілеу", icon: "progress" },
   { href: "/wallet", label: "Әмиян", icon: "wallet" },
   { href: "/profile", label: "Профиль", icon: "user" },
@@ -171,9 +172,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
         {/* Mobile bottom navigation */}
         <nav
           aria-label="Мобильді навигация"
-          className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 rounded-t-[24px] border-t border-border-soft bg-warm-white/85 px-1 pb-[calc(env(safe-area-inset-bottom)+6px)] pt-2 shadow-[0_-8px_28px_rgba(38,55,70,0.06)] backdrop-blur-xl lg:hidden"
+          className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 rounded-t-[24px] border-t border-border-soft bg-warm-white/85 px-1 pb-[calc(env(safe-area-inset-bottom)+6px)] pt-2 shadow-[0_-8px_28px_rgba(38,55,70,0.06)] backdrop-blur-xl lg:hidden"
         >
-          {[navItems[0], navItems[1], navItems[2], navItems[3], navItems[5]].map(
+          {[navItems[0], navItems[1], navItems[2], navItems[3], navItems[4], navItems[6]].map(
             (item) => (
               <NavLink
                 key={item.href}

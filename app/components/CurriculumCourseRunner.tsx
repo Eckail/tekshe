@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   Curriculum,
   CurriculumExercise,
@@ -12,6 +12,11 @@ import {
 } from "../data/curriculumProgress";
 import { completeCourse } from "../data/courseProgress";
 import { awardXP, COURSE_COMPLETION_XP } from "../data/xp";
+import { createLearningRecordId } from "../data/progress";
+import {
+  introduceVocabularyForReview,
+  recordExerciseReviewResult,
+} from "../data/reviewSystem";
 import type { CourseId } from "../data/courseProgress";
 import Link from "next/link";
 import {
@@ -75,6 +80,9 @@ export default function CurriculumCourseRunner({
   const [audioNotice, setAudioNotice] = useState("");
   const [progressNotice, setProgressNotice] = useState("");
   const [rewardNotice, setRewardNotice] = useState("");
+  const reviewSessionId = useRef<string | null>(null);
+  const reviewAttemptSequence = useRef(0);
+  const checkedAnswers = useRef<Record<string, string>>({});
 
   useEffect(() => {
     const updateProgress = () => {
@@ -135,11 +143,27 @@ export default function CurriculumCourseRunner({
 
   function checkAnswer(exercise: CurriculumExercise) {
     const selected = selectedAnswers[exercise.id];
-    if (!selected) return;
+    if (
+      !selected ||
+      exerciseResults[exercise.id] !== undefined ||
+      checkedAnswers.current[exercise.id] === selected
+    ) return;
+    checkedAnswers.current[exercise.id] = selected;
+
+    const correct = answerIsCorrect(exercise, selected);
+    if (exercise.reviewItemIds?.length) {
+      reviewSessionId.current ??= createLearningRecordId();
+      reviewAttemptSequence.current += 1;
+      recordExerciseReviewResult({
+        itemIds: exercise.reviewItemIds,
+        attemptId: `${reviewSessionId.current}:${activeLesson.id}:${exercise.id}:${reviewAttemptSequence.current}`,
+        correct,
+      });
+    }
 
     setExerciseResults((current) => ({
       ...current,
-      [exercise.id]: answerIsCorrect(exercise, selected),
+      [exercise.id]: correct,
     }));
   }
 
@@ -162,6 +186,11 @@ export default function CurriculumCourseRunner({
       setProgressNotice("Сабақтың барысын сақтау мүмкін болмады. Қайталап көріңіз.");
       return;
     }
+    introduceVocabularyForReview(
+      activeLesson.vocabularyIds,
+      curriculum.id,
+      activeLesson.id,
+    );
     awardLessonCoins(curriculum.id, activeLesson.id);
     if (result.courseCompleted) awardCourseMilestoneCoins(curriculum.id);
 

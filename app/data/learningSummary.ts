@@ -7,6 +7,7 @@ import { getTotalXP } from "./xp";
 import { getWalletSnapshot } from "./tekCoins";
 import { getXPLevel } from "./xpLevels";
 import { DEFAULT_LEARNER_PROFILE, readLearnerProfile, type LearnerProfile } from "./learnerProfile";
+import { getReviewDashboardSnapshot } from "./reviewSystem";
 
 export type LearningSummary = {
   coinBalance: number;
@@ -28,6 +29,9 @@ export type LearningSummary = {
   totalLessons: number;
   completedCourses: number;
   totalCourses: number;
+  reviewDueCount: number;
+  reviewCardCount: number;
+  reviewsToday: number;
 };
 
 const emptySummary: LearningSummary = {
@@ -50,6 +54,9 @@ const emptySummary: LearningSummary = {
   totalLessons: pinyinCurriculum.lessons.length + hsk1FoundationCurriculum.lessons.length,
   completedCourses: 0,
   totalCourses: 2,
+  reviewDueCount: 0,
+  reviewCardCount: 0,
+  reviewsToday: 0,
 };
 
 function localDayKey(value: Date): string {
@@ -143,6 +150,7 @@ export function readLearningSummary(): LearningSummary {
   const last = getStoredLastRoute();
   const wallet = getWalletSnapshot();
   const learnerProfile = readLearnerProfile();
+  const reviewSnapshot = getReviewDashboardSnapshot();
   const totalXP = getTotalXP();
   const xpLevel = getXPLevel(totalXP);
   const today = localDayKey(new Date());
@@ -178,6 +186,9 @@ export function readLearningSummary(): LearningSummary {
     totalLessons,
     completedCourses,
     totalCourses: 2,
+    reviewDueCount: reviewSnapshot.dueCount,
+    reviewCardCount: reviewSnapshot.totalCards,
+    reviewsToday: reviewSnapshot.reviewedToday,
   };
 }
 

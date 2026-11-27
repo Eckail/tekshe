@@ -146,3 +146,52 @@ XP remains client-side and can be edited by the learner through browser storage.
 3. The streak reward amount is reserved in configuration but streak tracking and payouts are not implemented.
 4. Wallet persistence, learning progress, and the remembered learning route are local to the current browser/device.
 5. Complete mobile viewport, assistive-technology, installability, and offline acceptance testing before describing the beta as device-verified.
+
+## 2026-11-27 — Core product review and spaced-repetition follow-up
+
+### Repository review
+
+- Verified the active branch is `feature/startup-demo-mvp`, tracking `origin/feature/startup-demo-mvp`. The checkout was clean before this task; the latest starting commit was `4ca640e`.
+- Reviewed the repository guidance, `PROJECT_MASTER.md`, this audit, `CHANGELOG.md`, `README.md`, `package.json`, Next.js configuration, curriculum contracts/data, lesson runner, progress, XP, Tek Coin, profile, settings, and existing tests.
+- `README.md` is still the unmodified create-next-app starter guide. `PROJECT_MASTER.md` contains the product and architecture record; product-specific route and curriculum facts were used for this audit.
+
+### Capability status
+
+| Area | Status | Evidence / boundary |
+| --- | --- | --- |
+| Versioned courses and lesson execution | Implemented | Shared `CurriculumCourseRunner`, Pinyin and HSK 1 data, lesson prerequisites, local completion, one-time XP and Tek Coin ledger entries. |
+| Exercise formats and per-item evidence | Partial | Current course questions are multiple choice. The data contract lists future formats; this pass adds explicit HSK exercise-to-vocabulary links and stores each linked answer outcome. |
+| Learning progress | Partial | Lessons, aggregate legacy exercise results, XP, wallet, learner profile, vocabulary review records, and the new dated-activity calendar are device-local. There is no account, server validation, or complete item-level history for legacy quizzes. |
+| Spaced repetition | Implemented for the HSK 1 vocabulary currently in the course | Versioned `tekshe-review:v1` store, lesson exposure, right/wrong exercise evidence, due queue, Again/Hard/Good/Easy scheduling, history, and a five-card daily quest. Unknown or invalid schemas remain untouched and read-only. |
+| Learning calendar | Implemented from dated records | Progress page groups dated lesson coin transactions, saved legacy exercise results, and completed review cards by local calendar day. It does not invent dates for older lesson completion flags that have no timestamp. |
+| Tek Coin | Implemented for current earning flows | Separate idempotent transaction ledger and daily quest claims; no spending, purchase, subscription, or redemption flow. |
+| AI teacher | Not implemented; safe service boundary only | Added typed request/context validation and a status-only `/api/ai-tutor` endpoint. No provider, API key, or generated AI response is configured; the endpoint reports unavailable rather than returning simulated content. No AI capability is claimed by the UI. |
+| Other language skills | Not implemented | HSK 1 vocabulary is the only review catalog. Full handwriting, speaking assessment, reading library, and listening library remain later work. |
+
+### Changes in this follow-up
+
+- Added typed vocabulary IDs to HSK exercises so question outcomes refer to real curriculum items rather than inferred strings.
+- Added `reviewSystem.ts` and the `/review` page. Completing an HSK lesson introduces the lesson's vocabulary into the queue; mapped exercise answers adjust intervals; manual recall ratings schedule the next date.
+- Added a daily task for five reviewed cards. Claiming uses existing idempotent XP and Tek Coin ledgers.
+- Dashboard and Progress now show review counts, and review is reachable from desktop and mobile navigation.
+- Added a Monday-first month calendar on Progress with real lesson, exercise, and SRS review records, activity summaries, date selection, and honest empty/undated-data states.
+- Added scheduler/storage/deduplication tests to the default `npm test` script.
+- Added AI tutor request/context types, provider boundary, validation, and an explicit unavailable API response. This is infrastructure only; it does not provide tutoring until a provider and secret configuration are intentionally added.
+
+### Verification
+
+- `npm test`: 31 passed, including existing curriculum, progress, XP, wallet, and profile suites, six review-system cases, four AI boundary cases, and three calendar cases.
+- `npm run typecheck -- --incremental false`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed after retrying once as required by Next.js 16.4.3's security reminder; `/review` is prerendered and `/api/ai-tutor` is dynamic.
+- `/`, `/review`, `/progress`, and a representative HSK lesson returned HTTP 200 from a local production server. The server was stopped after the check.
+- `git diff --check`: passed. The active branch and uncommitted worktree were checked at task completion; no commit or push was made.
+
+### Remaining risks and next steps
+
+1. All state and rewards still live in editable browser storage; this is suitable for a local beta, not authoritative accounts or fraud-resistant rewards.
+2. Review content currently covers only the existing HSK 1 starter vocabulary; pinyin concepts, additional HSK versions, and other skills need explicit catalogs before they can enter SRS.
+3. Add unified item-level records for legacy quiz attempts in a later, migration-safe step. Calendar history is exact only for activities that stored a timestamp.
+4. AI service/provider architecture is still absent; add it only after choosing a provider and a safe key-management path. Without a configured key, show a clear unavailable state rather than simulated AI.
+5. Next.js 16.4.3 displays a known security-upgrade reminder during dev/build and asks for a retry. Review that upgrade before a production release.
+6. Obtain native Kazakh editorial review and test the review flow on a physical phone.

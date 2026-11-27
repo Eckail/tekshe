@@ -2,6 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { hsk1FoundationCurriculum, hsk1FoundationVocabulary, hsk1SourceId } from "./hsk1Foundation.ts";
 import { pinyinCurriculum, pinyinFinalGroups, pinyinInitials, pinyinToneInventory } from "./pinyinCurriculum.ts";
+import { u01Release, validateU01DraftStatuses } from "./u01Curriculum.ts";
+import { validateCurriculumRelease } from "./curriculumRepository.ts";
+import { scoreAssessment } from "./assessmentService.ts";
+import { completePathLessonIfEligible, getKnowledgePointEvidence, getPathLessonState } from "./pathCompletionService.ts";
+import { LocalLearningEventRepository } from "./learningEventRepository.ts";
+import { transitionEditorialRevision } from "./editorialWorkflow.ts";
 
 function validateCurriculum(curriculum) {
   const ids = (items) => items.map(({ id }) => id);
@@ -57,6 +63,9 @@ function validateCurriculum(curriculum) {
     const answers = Array.isArray(exercise.answer) ? exercise.answer : [exercise.answer];
     assert.ok(answers.length > 0, `${exercise.id}: empty answer`);
     for (const answer of answers) assert.ok(exercise.options.includes(answer), `${exercise.id}: answer not present in choices`);
+    for (const reviewItemId of exercise.reviewItemIds ?? []) {
+      assert.ok(vocabularyIds.has(reviewItemId), `${exercise.id}: unknown review vocabulary ${reviewItemId}`);
+    }
     if (exercise.type === "listening-selection") assert.ok(exercise.audioText?.trim(), `${exercise.id}: listening prompt has no audio text`);
   }
 
@@ -106,4 +115,234 @@ test("HSK beginner vocabulary is sourced, versioned and structurally complete", 
   }
 
   validateCurriculum(hsk1FoundationCurriculum);
+});
+
+function answersFor(assessment, release = u01Release) {
+  return Object.fromEntries(assessment.exerciseIds.map((id) => {
+    const exercise = release.exercises.find((item) => item.id === id);
+    const value = exercise.answerKey;
+    const answer = exercise.interaction === "order"
+      ? { kind: "order", value }
+      : exercise.interaction === "text"
+        ? { kind: "text", value }
+        : { kind: "choice", value };
+    return [id, answer];
+  }));
+}
+
+function memoryRepository() {
+  const values = new Map();
+  const storage = {
+    getItem: (key) => values.has(key) ? values.get(key) : null,
+    setItem: (key, value) => values.set(key, value),
+  };
+  return new LocalLearningEventRepository(storage);
+}
+
+test("U01 release pins unique KnowledgePoint revisions and has shared path/module references", () => {
+  assert.deepEqual(validateCurriculumRelease(u01Release), { valid: true });
+  assert.equal(u01Release.lessons.length, 4);
+  assert.equal(u01Release.independentModules.length, 8);
+  assert.equal(new Set(u01Release.knowledgePoints.map(({ id }) => id)).size, u01Release.knowledgePoints.length);
+  assert.equal(new Set(u01Release.knowledgePointRevisions.map(({ id }) => id)).size, u01Release.knowledgePointRevisions.length);
+  for (const point of u01Release.knowledgePoints) {
+    const pin = u01Release.knowledgePointPins.filter((item) => item.knowledgePointId === point.id);
+    assert.equal(pin.length, 1);
+    assert.equal(u01Release.knowledgePointRevisions.find(({ id }) => id === pin[0].revisionId).knowledgePointId, point.id);
+  }
+  for (const independentModule of u01Release.independentModules) {
+    assert.ok(independentModule.knowledgePointIds.length > 0);
+    assert.ok(independentModule.contentBlockIds.length > 0 || independentModule.exerciseIds.length > 0);
+    for (const id of independentModule.knowledgePointIds) assert.ok(u01Release.knowledgePoints.some((point) => point.id === id));
+  }
+  assert.deepEqual(validateU01DraftStatuses(), []);
+});
+
+test("U01 greetings map to official HSK 1 interaction sources without copying legacy words", () => {
+  const task = u01Release.coverageRequirements.find(({ officialItemKey }) => officialItemKey === "T06");
+  const topic = u01Release.coverageRequirements.find(({ officialItemKey }) => officialItemKey === "日常生活 > 交往 > 基本礼貌行为");
+  assert.equal(task.section, "task");
+  assert.match(task.sourceLocator, /PDF 第 2–5 页/);
+  assert.equal(task.coverageStatus, "partial");
+  assert.equal(topic.section, "topic");
+  assert.match(topic.sourceLocator, /PDF 第 56 页/);
+  assert.equal(topic.coverageStatus, "partial");
+
+  const dialogue = u01Release.contentBlocks.find(({ id }) => id === "u01-dialogue-first-meeting");
+  assert.ok(dialogue.sourceRequirementIds.includes(task.id));
+  assert.ok(dialogue.sourceRequirementIds.includes(topic.id));
+  for (const [knowledgePointId, legacyVocabularyId, lessonIndex] of [
+    ["kp.vocabulary.0016", "hsk1-hao", 2],
+    ["kp.vocabulary.0017", "hsk1-zaijian", 1],
+  ]) {
+    const revision = u01Release.knowledgePointRevisions.find(({ knowledgePointId: id }) => id === knowledgePointId);
+    assert.ok(revision.legacyVocabularyIds.includes(legacyVocabularyId));
+    assert.ok(task.knowledgePointIds.includes(knowledgePointId));
+    assert.ok(topic.knowledgePointIds.includes(knowledgePointId));
+    assert.ok(u01Release.independentModules.find(({ id }) => id === "u01-module-vocabulary").knowledgePointIds.includes(knowledgePointId));
+    assert.ok(u01Release.lessons[lessonIndex].knowledgePointIds.includes(knowledgePointId));
+  }
+});
+
+test("U01 assessments are fixed to the 80/70 rule and require every scored item", () => {
+  assert.equal(u01Release.assessments.length, 4);
+  for (const assessment of u01Release.assessments) {
+    assert.equal(assessment.rule.minimumTotalPercent, 80);
+    assert.equal(assessment.rule.allRequiredItemsMustBeScored, true);
+    assert.ok(Object.values(assessment.rule.requiredObjectiveMinimumPercent).every((value) => value === 70));
+    assert.equal(assessment.exerciseIds.length, 5);
+    const missing = scoreAssessment(u01Release, assessment, {}, "missing-attempt");
+    assert.equal(missing.status, "incomplete");
+    const answers = answersFor(assessment);
+    const passed = scoreAssessment(u01Release, assessment, answers, "passing-attempt");
+    assert.equal(passed.status, "scored");
+    assert.equal(passed.result.passed, true);
+    const belowThreshold = { ...answers };
+    for (const incorrectId of assessment.exerciseIds.slice(0, 2)) {
+      belowThreshold[incorrectId] = { kind: "choice", value: "definitely-wrong" };
+    }
+    const below = scoreAssessment(u01Release, assessment, belowThreshold, "failing-attempt");
+    assert.equal(below.status, "scored");
+    assert.equal(below.result.passed, false);
+  }
+});
+
+test("independent module evidence is visible to U01 but cannot complete its path lesson", () => {
+  const repository = memoryRepository();
+  const learnerId = "learner-test";
+  const vocabularyModule = u01Release.independentModules.find(({ id }) => id === "u01-module-vocabulary");
+  const opened = {
+    eventId: "module-opened-vocabulary", schemaVersion: 1, type: "module_opened",
+    learnerId, occurredAt: "2026-01-01T00:00:00.000Z", curriculumId: u01Release.curriculumId,
+    contentVersion: u01Release.contentVersion, entryPoint: { mode: "independent", moduleId: vocabularyModule.id },
+    knowledgePointIds: ["kp.vocabulary.0001"], payload: null,
+  };
+  assert.equal(repository.append(opened).ok, true);
+  assert.equal(repository.append(opened).duplicate, true);
+  const exercise = u01Release.exercises.find(({ id }) => id === "u01-l1-practice-greeting");
+  assert.equal(repository.append({
+    eventId: "independent-answer-1", schemaVersion: 1, type: "exercise_submitted",
+    learnerId, occurredAt: "2026-01-01T00:01:00.000Z", curriculumId: u01Release.curriculumId,
+    contentVersion: u01Release.contentVersion, entryPoint: { mode: "independent", moduleId: vocabularyModule.id },
+    knowledgePointIds: exercise.knowledgePointIds,
+    payload: {
+      exerciseId: exercise.id, exerciseRevisionId: exercise.revisionId, attemptId: "module-attempt-1",
+      answer: { kind: "choice", value: "Сәлем" }, outcome: "correct",
+    },
+  }).ok, true);
+  assert.deepEqual(repository.append({
+    eventId: "independent-answer-duplicate", schemaVersion: 1, type: "exercise_submitted",
+    learnerId, occurredAt: "2026-01-01T00:01:30.000Z", curriculumId: u01Release.curriculumId,
+    contentVersion: u01Release.contentVersion, entryPoint: { mode: "independent", moduleId: vocabularyModule.id },
+    knowledgePointIds: exercise.knowledgePointIds,
+    payload: {
+      exerciseId: exercise.id, exerciseRevisionId: exercise.revisionId, attemptId: "module-attempt-1",
+      answer: { kind: "choice", value: "Сәлем" }, outcome: "correct",
+    },
+  }), { ok: false, reason: "attempt-id-reused" });
+  const events = repository.read().events;
+  const evidence = getKnowledgePointEvidence(u01Release, learnerId, events).find(({ knowledgePointId }) => knowledgePointId === "kp.vocabulary.0001");
+  assert.equal(evidence.exposed, true);
+  assert.equal(evidence.practiceCount, 1);
+  const lesson = u01Release.lessons[0];
+  const assessment = u01Release.assessments.find(({ lessonId }) => lessonId === lesson.id);
+  const result = scoreAssessment(u01Release, assessment, answersFor(assessment), "independent-assessment-attempt");
+  assert.equal(result.status, "scored");
+  assert.equal(repository.append({
+    eventId: "independent-assessment-1", schemaVersion: 1, type: "assessment_completed",
+    learnerId, occurredAt: "2026-01-01T00:02:00.000Z", curriculumId: u01Release.curriculumId,
+    contentVersion: u01Release.contentVersion, entryPoint: { mode: "independent", moduleId: vocabularyModule.id },
+    knowledgePointIds: lesson.knowledgePointIds, payload: result.result,
+  }).ok, true);
+  const completion = completePathLessonIfEligible({
+    release: u01Release, lessonId: lesson.id, learnerId,
+    allEvents: repository.read().events, repository,
+  });
+  assert.equal(completion.completed, false);
+  assert.equal(completion.reason, "required-path-assessment-not-passed");
+  assert.equal(getPathLessonState(u01Release, lesson.id, learnerId, repository.read().events), "not-started");
+  assert.equal(repository.read().events.filter(({ type }) => type === "lesson_completed").length, 0);
+});
+
+test("only a passing path assessment derives path completion, and the event is idempotent", () => {
+  const repository = memoryRepository();
+  const learnerId = "learner-path";
+  const lesson = u01Release.lessons[0];
+  const assessment = u01Release.assessments.find(({ lessonId }) => lessonId === lesson.id);
+  const answerSet = answersFor(assessment);
+  const result = scoreAssessment(u01Release, assessment, answerSet, "path-assessment-attempt");
+  assert.equal(result.status, "scored");
+  for (const exerciseId of assessment.exerciseIds) {
+    const exercise = u01Release.exercises.find(({ id }) => id === exerciseId);
+    assert.equal(repository.append({
+      eventId: "path-answer-" + exerciseId, schemaVersion: 1, type: "exercise_submitted",
+      learnerId, occurredAt: "2026-01-01T00:00:00.000Z", curriculumId: u01Release.curriculumId,
+      contentVersion: u01Release.contentVersion,
+      entryPoint: { mode: "path", pathId: u01Release.path.id, lessonId: lesson.id },
+      knowledgePointIds: exercise.knowledgePointIds,
+      payload: {
+        exerciseId, exerciseRevisionId: exercise.revisionId,
+        attemptId: result.result.attemptId + ":" + exerciseId,
+        answer: answerSet[exerciseId], outcome: "correct",
+      },
+    }).ok, true);
+  }
+  const event = {
+    eventId: "path-assessment-1", schemaVersion: 1, type: "assessment_completed",
+    learnerId, occurredAt: "2026-01-01T00:00:00.000Z", curriculumId: u01Release.curriculumId,
+    contentVersion: u01Release.contentVersion,
+    entryPoint: { mode: "path", pathId: u01Release.path.id, lessonId: lesson.id },
+    knowledgePointIds: lesson.knowledgePointIds, payload: result.result,
+  };
+  assert.equal(repository.append(event).ok, true);
+  const completed = completePathLessonIfEligible({
+    release: u01Release, lessonId: lesson.id, learnerId,
+    allEvents: repository.read().events, repository,
+  });
+  assert.equal(completed.completed, true);
+  assert.equal(getPathLessonState(u01Release, lesson.id, learnerId, repository.read().events), "completed");
+  completePathLessonIfEligible({ release: u01Release, lessonId: lesson.id, learnerId, allEvents: repository.read().events, repository });
+  assert.equal(repository.read().events.filter(({ type }) => type === "lesson_completed").length, 1);
+});
+
+test("a bare or forged lesson-completed event cannot unlock the next path lesson", () => {
+  const repository = memoryRepository();
+  const learnerId = "learner-forged-event";
+  const lesson = u01Release.lessons[0];
+  assert.equal(repository.append({
+    eventId: "forged-completion", schemaVersion: 1, type: "lesson_completed",
+    learnerId, occurredAt: "2026-01-01T00:00:00.000Z", curriculumId: u01Release.curriculumId,
+    contentVersion: u01Release.contentVersion,
+    entryPoint: { mode: "path", pathId: u01Release.path.id, lessonId: lesson.id },
+    knowledgePointIds: lesson.knowledgePointIds,
+    payload: { completionRuleVersion: "u01-path-completion-v1", qualifyingAssessmentAttemptIds: ["not-real"] },
+  }).ok, true);
+  assert.equal(getPathLessonState(u01Release, lesson.id, learnerId, repository.read().events), "not-started");
+  assert.equal(getPathLessonState(u01Release, u01Release.lessons[1].id, learnerId, repository.read().events), "not-started");
+  const result = completePathLessonIfEligible({
+    release: u01Release, lessonId: lesson.id, learnerId,
+    allEvents: repository.read().events, repository,
+  });
+  assert.equal(result.completed, false);
+  assert.equal(result.reason, "required-path-assessment-not-passed");
+});
+
+test("editorial status requires independent review and release checks", () => {
+  const initial = { entityId: "kp.example", revisionId: "kp.example-r1", authorId: "author-1", status: "draft", reviews: [] };
+  const pending = transitionEditorialRevision(initial, "pending-review");
+  assert.equal(pending.ok, true);
+  assert.equal(transitionEditorialRevision(pending.revision, "published", true).ok, false);
+  const reviewed = transitionEditorialRevision({
+    ...pending.revision,
+    reviews: [
+      { reviewerId: "reviewer-kz", role: "kazakh-language", decision: "pass", checklistVersion: "v1" },
+      { reviewerId: "reviewer-cn", role: "chinese-pedagogy", decision: "pass", checklistVersion: "v1" },
+      { reviewerId: "reviewer-standard", role: "standards", decision: "pass", checklistVersion: "v1" },
+    ],
+  }, "reviewed");
+  assert.equal(reviewed.ok, true);
+  assert.equal(transitionEditorialRevision(reviewed.revision, "published", false).ok, false);
+  const published = transitionEditorialRevision(reviewed.revision, "published", true);
+  assert.equal(published.ok, true);
+  assert.equal(transitionEditorialRevision(published.revision, "draft").ok, false);
 });

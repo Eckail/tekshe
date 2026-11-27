@@ -64,6 +64,13 @@ export default function HskAcademyPage() {
       </section>
 
       <HskLevelCatalog curriculum={hsk1FoundationCurriculum} />
+      <section className="rounded-card border border-border-soft bg-card p-5 shadow-card sm:p-7">
+        <p className="text-[10px] font-semibold tracking-[0.18em] text-blue-dark">HSK 1 · U01 ҮЛГІ САБАҚ</p>
+        <h2 className="mt-2 text-lg font-semibold text-text-primary">Жеке ақпарат және алғашқы кездесу</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-text-secondary">Төрт сабақтан тұратын жаңа негізгі жол. Материал қазір draft күйінде; әр сабақта жаттығу мен нақты ережемен бағаланатын өлшем бар.</p>
+        <Link href={"/learn/hsk/" + hsk1FoundationCurriculum.levels[0].id + "/units/hsk1-u01-personal-introductions"} className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-blue-dark px-4 text-sm font-semibold text-white hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue">U01 сабағын бастау</Link>
+        <Link href="/learn/modules" className="ml-2 mt-4 inline-flex min-h-11 items-center rounded-xl border border-border-soft bg-card px-4 text-sm font-semibold text-text-primary hover:bg-ice focus-visible:outline-2 focus-visible:outline-blue">Тәуелсіз модульдер</Link>
+      </section>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { learningSummaryStore } from "../data/learningSummary";
 import { pinyinCurriculum } from "../data/pinyinCurriculum";
 import { hsk1FoundationCurriculum } from "../data/hsk1Foundation";
 import PlayerProgress from "./PlayerProgress";
+import LearningCalendar from "./LearningCalendar";
 
 function CourseProgress({ title, done, total, href }: { title: string; done: number; total: number; href: string }) {
   const percent = total ? Math.round((done / total) * 100) : 0;
@@ -25,12 +26,14 @@ export default function ProgressDashboard() {
   return (
     <div className="space-y-9">
       <PageHeading eyebrow="ЖЕКЕ ОҚУ ЖУРНАЛЫ" title="Ілгерілеу" description="Көрсеткіштер браузерде сақталған нақты сабақ, жаттығу және марапат жазбаларынан алынады." />
-      <section className="grid gap-3 sm:grid-cols-3" aria-label="Оқу көрсеткіштері">
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Оқу көрсеткіштері">
         <article className="rounded-2xl border border-border-soft bg-card p-5 shadow-sm sm:p-6"><p className="text-xs text-text-secondary">Аяқталған сабақ</p><p className="mt-2 text-3xl font-semibold">{summary.completedPinyin.length + summary.completedHsk.length}</p></article>
         <article className="rounded-2xl border border-border-soft bg-card p-5 shadow-sm sm:p-6"><p className="text-xs text-text-secondary">Сақталған жаттығу</p><p className="mt-2 text-3xl font-semibold">{summary.practiceCount}</p></article>
+        <Link href="/review" className="rounded-2xl border border-border-soft bg-card p-5 shadow-sm transition hover:border-blue/40 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue sm:p-6"><p className="text-xs text-text-secondary">Қазір қайталау керек</p><p className="mt-2 text-3xl font-semibold">{summary.reviewDueCount}</p><p className="mt-1 text-xs text-blue-dark">{summary.reviewCardCount} сөз · бетті ашу →</p></Link>
         <article className="rounded-2xl border border-border-soft bg-card p-5 shadow-sm sm:p-6"><p className="text-xs text-text-secondary">Tek Coin балансы</p><p className="mt-2 text-3xl font-semibold">{summary.coinBalance}</p><p className="mt-1 text-xs text-text-secondary">Оқу марапаттары бөлек әмиян журналында.</p></article>
       </section>
       <PlayerProgress />
+      <LearningCalendar />
       <section aria-labelledby="course-progress-title">
         <div className="mb-4"><p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-dark">БАҒДАРЛАМАЛАР</p><h2 id="course-progress-title" className="mt-2 text-section-title font-semibold">Курс барысы</h2></div>
         <div className="grid gap-3 lg:grid-cols-2">

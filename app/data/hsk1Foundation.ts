@@ -167,6 +167,7 @@ const exercises: CurriculumExercise[] = [
     options: ["朋友", "老师", "学生"],
     answer: "朋友",
     explanationKazakh: "朋友 péngyou — дос деген сөз.",
+    reviewItemIds: ["hsk1-pengyou"],
   },
   {
     id: "hsk1-intro-pronoun",
@@ -175,6 +176,7 @@ const exercises: CurriculumExercise[] = [
     options: ["мен", "сен", "ол (ер адам)"],
     answer: "ол (ер адам)",
     explanationKazakh: "他 tā — ер адамға қатысты қолданылатын «ол» есімдігі.",
+    reviewItemIds: ["hsk1-ta"],
   },
   {
     id: "hsk1-classroom-language",
@@ -183,6 +185,7 @@ const exercises: CurriculumExercise[] = [
     options: ["汉语", "中国", "学生"],
     answer: "汉语",
     explanationKazakh: "汉语 Hànyǔ — қытай тілі; 中国 Zhōngguó — Қытай елі.",
+    reviewItemIds: ["hsk1-hanyu"],
   },
   {
     id: "hsk1-classroom-study",
@@ -191,6 +194,7 @@ const exercises: CurriculumExercise[] = [
     options: ["学习", "老师", "中国"],
     answer: "学习",
     explanationKazakh: "学习 xuéxí — оқу, үйрену әрекеті.",
+    reviewItemIds: ["hsk1-xuexi"],
   },
   {
     id: "hsk1-daily-negation",
@@ -199,6 +203,7 @@ const exercises: CurriculumExercise[] = [
     options: ["我不喝茶。", "我喝茶。", "请喝水。"],
     answer: "我不喝茶。",
     explanationKazakh: "不 болымсыздықты білдіреді: 我不喝茶。 — Мен шай ішпеймін.",
+    reviewItemIds: ["hsk1-bu"],
   },
   {
     id: "hsk1-daily-request",
@@ -207,6 +212,7 @@ const exercises: CurriculumExercise[] = [
     options: ["请喝水。", "我爱妈妈。", "谢谢你。"],
     answer: "请喝水。",
     explanationKazakh: "请 сөйлемді өтінішке айналдырады: 请喝水。 — Су ішіңізші.",
+    reviewItemIds: ["hsk1-qing"],
   },
   {
     id: "hsk1-daily-one",
@@ -215,6 +221,7 @@ const exercises: CurriculumExercise[] = [
     options: ["yī", "yí", "yì"],
     answer: "yí",
     explanationKazakh: "一 төртінші тонды буынның алдында көбіне екінші тонға ауысады: yí ge.",
+    reviewItemIds: ["hsk1-yi"],
   },
 ];
 

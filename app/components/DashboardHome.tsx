@@ -207,6 +207,31 @@ export default function DashboardHome() {
         </div>
       </section>
 
+      <section className="flex flex-col gap-5 rounded-[24px] border border-border-soft bg-gradient-to-br from-card to-mint/25 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6" aria-labelledby="review-shortcut-title">
+        <div className="flex items-start gap-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-mint/55 text-mint-dark">
+            <AppIcon name="review" className="h-5 w-5" />
+          </span>
+          <div>
+            <p className="text-[10px] font-semibold tracking-[0.18em] text-mint-dark">АРАЛЫҚ ҚАЙТАЛАУ</p>
+            <h2 id="review-shortcut-title" className="mt-1 font-semibold text-text-primary">
+              {summary.reviewDueCount > 0
+                ? `${summary.reviewDueCount} сөзді қайталау уақыты келді`
+                : "Үйренген сөздерді ұмытпай бекітіңіз"}
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-text-secondary">
+              {summary.reviewCardCount > 0
+                ? `${summary.reviewCardCount} сөз қайталау жүйесіне қосылған · бүгін ${summary.reviewsToday} карточка қаралды`
+                : "HSK 1 сабағын аяқтаған сөздер осы жерде аралықпен қайталанады."}
+            </p>
+          </div>
+        </div>
+        <Link href="/review" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-blue/20 bg-blue/10 px-5 text-sm font-semibold text-blue-dark transition hover:bg-blue/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue">
+          {summary.reviewDueCount > 0 ? "Қайталауды бастау" : "Қайталауды ашу"}
+          <AppIcon name="arrow" className="h-4 w-4" />
+        </Link>
+      </section>
+
       {/* Learning statistics */}
       <section aria-label="Оқу статистикасы">
         <div className="mb-4 flex items-center justify-between">

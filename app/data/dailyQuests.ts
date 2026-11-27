@@ -1,5 +1,6 @@
 
 import { getLearningRecords } from "./progress";
+import { getTodayReviewCount } from "./reviewSystem";
 import { awardXP, getXPForSource, hasXPAward } from "./xp";
 import {
   awardTekCoins,
@@ -26,22 +27,22 @@ function getDateKey(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
-function getTodayKey() {
-  return getDateKey(new Date());
+function getTodayKey(now = new Date()) {
+  return getDateKey(now);
 }
 
-function getTodayRecords() {
-  const today = getTodayKey();
+function getTodayRecords(now = new Date()) {
+  const today = getDateKey(now);
 
   return getLearningRecords().filter(
     (record) => getDateKey(new Date(record.date)) === today
   );
 }
 
-export function getDailyQuests(): DailyQuest[] {
-  const records = getTodayRecords();
+export function getDailyQuests(now = new Date()): DailyQuest[] {
+  const records = getTodayRecords(now);
 
-  const today = getTodayKey();
+  const today = getTodayKey(now);
   const claimedKey = `tekshe-daily-claims-${today}`;
   let claimedIds: string[] = [];
 
@@ -65,6 +66,7 @@ export function getDailyQuests(): DailyQuest[] {
   const hasListening = records.some(
     (record) => record.mode === "listening"
   );
+  const reviewCount = getTodayReviewCount(now);
 
   return [
     {
@@ -106,18 +108,31 @@ export function getDailyQuests(): DailyQuest[] {
         hasXPAward(`daily-quest:${today}:listening-exercise`) ||
         hasTekCoinTransaction(`quest:${today}:listening-exercise`),
     },
+    {
+      id: "daily-review",
+      title: "Білгеніңді бекіт",
+      description: "Бес карточканы аралық қайталаудан өткізіңіз.",
+      xpReward: 25,
+      progress: Math.min(reviewCount, 5),
+      target: 5,
+      completed: reviewCount >= 5,
+      claimed:
+        claimedIds.includes("daily-review") ||
+        hasXPAward(`daily-quest:${today}:daily-review`) ||
+        hasTekCoinTransaction(`quest:${today}:daily-review`),
+    },
   ];
 }
 
-export function claimDailyQuest(id: string): boolean {
-  const quests = getDailyQuests();
+export function claimDailyQuest(id: string, now = new Date()): boolean {
+  const quests = getDailyQuests(now);
   const quest = quests.find((item) => item.id === id);
 
   if (!quest || !quest.completed || quest.claimed) {
     return false;
   }
 
-  const today = getTodayKey();
+  const today = getTodayKey(now);
   const claimedKey = `tekshe-daily-claims-${today}`;
   if (typeof window === "undefined") return false;
 

@@ -153,3 +153,35 @@ Recommended next stage: get native Kazakh review for the current material, then 
 - Current checks are `npm run dev`, `npm run lint`, `npm run typecheck -- --incremental false`, `npm test`, and `npm run build`.
 - Learner profile and learning progress are still browser-local and can be lost if site data is cleared. Native Kazakh editorial review and reviewed Mandarin recordings remain open curriculum tasks.
 - Next.js 16.4.3 stopped the first dev/build attempt to display a security-upgrade recommendation and continued after retry. Review the recommended `next upgrade --agent=security` separately before release.
+
+## 2026-11-27 — HSK vocabulary review and AI service boundary
+
+### Learning review
+
+- HSK 1 vocabulary can now enter a versioned, browser-local spaced-repetition queue when its lesson is completed. Mapped exercise outcomes and learner recall ratings schedule review dates; the `/review` page shows due cards and examples.
+- A five-card review quest awards through the existing idempotent XP and Tek Coin systems. Dashboard, Progress, and navigation expose the review flow.
+- This is a local review foundation for the current HSK 1 catalog. The dated-activity calendar is implemented on Progress, while account sync, server-side learner records, authoritative reward validation, and review catalogs for other levels and skills remain out of scope.
+
+### AI service boundary
+
+- Added typed request and learning-context validation plus a status-only `/api/ai-tutor` route that clearly reports that no provider is configured.
+- No AI provider, credential, generated tutor response, or user-facing AI feature exists. Provider integration requires a separately chosen provider and secure server-side secret configuration.
+
+### Current verification and workflow
+
+- `npm test`: 28 passed. TypeScript and ESLint passed. The production build passed after retrying once following the Next.js 16.4.3 security reminder.
+- Local production HTTP checks returned 200 for the Dashboard, review page, and a representative HSK lesson. No browser-based visual or physical-phone acceptance run was performed in this follow-up.
+- The working branch remains `feature/startup-demo-mvp`; changes are uncommitted. No commit, push, merge, or Production Deployment was performed.
+- Node 26 prints non-blocking module-type detection warnings when the test runner imports TypeScript modules under the existing package module configuration. The package-wide module system was left unchanged.
+- Review the Next.js security-upgrade recommendation before a production release.
+
+## 2026-11-27 — Dated learning calendar
+
+- Added a responsive, keyboard-operable month calendar to Progress. It groups real dated lesson completions, saved exercise results, and completed SRS reviews, with per-day details and month totals.
+- The calendar uses existing local records and adds no storage migration. It does not infer dates for older lesson flags that never stored timestamps.
+- Three calendar tests cover event grouping, Monday-first/leap-month layout, invalid dates, and the undated-history boundary.
+### Calendar verification
+
+- Full tests: 31 passed; TypeScript and ESLint passed.
+- Next.js production build passed with `/progress`, `/review`, and the dynamic tutor-status API generated. The build displayed the known Next.js 16.4.3 security reminder and continued.
+- Local production HTTP checks returned 200 for `/progress`, `/review`, and a representative HSK lesson. The temporary server was stopped.

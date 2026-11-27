@@ -119,3 +119,38 @@
 - Profile and learning data remain local to the current browser; account and sync support are not included.
 - Next.js 16.4.3 reports a known security advisory. Review its security upgrade recommendation before production release.
 - Continue with native Kazakh review, judge-facing demo rehearsal, and a deliberate release review before merging to `main`.
+
+## 2026-11-27 — Vocabulary review and AI boundary foundation
+
+### Added
+
+- A versioned local spaced-repetition system for the current HSK 1 vocabulary, with lesson exposure, mapped exercise evidence, four recall ratings, due-card counts, and review history.
+- A responsive `/review` page linked from the Dashboard, Progress, and app navigation. A five-card daily review quest uses the existing one-time XP and Tek Coin reward ledgers.
+- Typed AI tutor request/context boundaries and a status-only API route. The route reports unavailable until a real provider and server-side credentials are configured; no AI response is simulated.
+- Review scheduler and AI boundary test suites in the default `npm test` command.
+
+### Verification
+
+- Tests: 28 passed, including XP, curriculum, progress, wallet, profile, review scheduling, and AI boundary cases.
+- TypeScript, ESLint, and the Next.js production build passed. The build continued successfully after the required retry following Next.js 16.4.3's security advisory notice.
+- Local production HTTP checks returned 200 for `/`, `/review`, and a representative HSK lesson.
+
+### Limits
+
+- Review history and rewards remain browser-local; they are not synchronized or server-authoritative.
+- AI tutoring is not available until a provider, secure server-side key configuration, and user-facing experience are deliberately implemented.
+- Node's native TypeScript test runner prints non-blocking module-type detection warnings for the existing package module style.
+
+## 2026-11-27 — Dated learning calendar
+
+### Added
+
+- A responsive, Monday-first month calendar on Progress, with month navigation, daily selection, real lesson/exercise/review activity, and monthly totals.
+- Calendar events are read from existing local records; older lesson completion flags with no timestamp are not assigned a guessed date.
+- Three calendar tests for activity aggregation, month boundaries, and invalid or undated records.
+
+### Verification
+
+- Full test suite: 31 passed. TypeScript and ESLint passed after the calendar implementation.
+- Production build passed; `/progress`, `/review`, and the dynamic AI status API were generated. The known Next.js 16.4.3 security reminder was displayed, and the build continued successfully.
+- Local production HTTP checks returned 200 for `/progress`, `/review`, and a representative HSK lesson; the temporary server was stopped.

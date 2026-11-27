@@ -1,4 +1,4 @@
-export type AppIconName = "home" | "book" | "practice" | "progress" | "wallet" | "user" | "arrow" | "check" | "clock" | "spark";
+export type AppIconName = "home" | "book" | "practice" | "review" | "progress" | "wallet" | "user" | "arrow" | "check" | "clock" | "spark";
 
 export default function AppIcon({
   name,
@@ -25,6 +25,8 @@ export default function AppIcon({
       return <svg {...common}><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z" /><path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20M8 7h8M8 10h6" /></svg>;
     case "practice":
       return <svg {...common}><path d="m9 12 2 2 4-5" /><circle cx="12" cy="12" r="9" /><path d="M12 3v2M21 12h-2M12 21v-2M3 12h2" /></svg>;
+    case "review":
+      return <svg {...common}><path d="M20 11a8 8 0 1 1-2.4-5.7" /><path d="M20 4v5h-5" /><path d="M12 7v5l3 2" /></svg>;
     case "progress":
       return <svg {...common}><path d="M4 19V5M4 19h16" /><path d="m7 15 4-4 3 2 5-7" /></svg>;
     case "wallet":
